@@ -1,8 +1,12 @@
+'use strict'
+
 // import electron into the app and BrowserWindow variables
 const {app, BrowserWindow} = require('electron')
 
 const path = require('path')
 const url = require('url')
+
+let win
 
 function createWindow() {
   // create the browser window
