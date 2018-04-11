@@ -15,4 +15,27 @@ let songs = []
 for (let x = 0; x < songArray.length; x+= 1) {
   songs.push(parseSong(songArray[x].innerHTML))
 }
-console.log(songs);
+
+// when the DOM loads
+document.addEventListener('DOMContentLoaded', function(event) {
+
+  // get our artist field
+  let artistSelect = document.getElementById('artist')
+  let songSelect = document.getElementById('song')
+
+  // for each song
+  songs.forEach(function (song) {
+    // create a new option element
+    let artistOption = document.createElement('option')
+    // set the value and content to the artist
+    artistOption.value = song.Artist
+    artistOption.innerHTML = song.Artist
+    // append the new option to the artist select tag
+    artistSelect.appendChild(artistOption)
+
+    let songOption = document.createElement('option')
+    songOption.value = song.Name
+    songOption.innerHTML = song.Name
+    songSelect.appendChild(songOption)
+  })
+})
