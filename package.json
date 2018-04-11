@@ -1,0 +1,15 @@
+{
+  "name": "TuneBase",
+  "version": "0.1.0",
+  "description": "An app for tracking data from iTunes over time",
+  "main": "index.js",
+  "repository": "https://github.com/ConnorChristensen/TuneBase.git",
+  "author": "ConnorChristensen <chriconn@oregonstate.edu>",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^1.8.4"
+  }
+}
