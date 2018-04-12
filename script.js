@@ -22,22 +22,35 @@ db.version(1).stores({
   songs: 'id, name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre'
 })
 
-for (let song of songs) {
-  db.songs.add({
-    id: song['Track ID'],
-    name: song["Name"],
-    artist: song["Artist"],
-    year: song["Year"],
-    dateModified: song["Date Modified"],
-    dateAdded: song['Date Added'],
-    bitRate: song['Bit Rate'],
-    playDate: song['Play date'],
-    album: song['Album'],
-    genre: song['Genre']
-  }).catch(function (error) {
-    console.log(error);
-  })
+// an asynchronous function that will return the
+// song with that trackID
+async function getSong(trackID) {
+  return db.songs.get(trackID)
 }
+
+;(async function() {
+  for (let song of songs) {
+    // check to see if it exists in the database
+    let songExists = await getSong(songs[0]['Track ID'])
+    // if it does not, then add it
+    if (!songExists) {
+      db.songs.add({
+        id: song['Track ID'],
+        name: song["Name"],
+        artist: song["Artist"],
+        year: song["Year"],
+        dateModified: song["Date Modified"],
+        dateAdded: song['Date Added'],
+        bitRate: song['Bit Rate'],
+        playDate: song['Play date'],
+        album: song['Album'],
+        genre: song['Genre']
+      }).catch(function (error) {
+        console.log(error);
+      })
+    }
+  }
+})()
 
 // when the DOM loads
 document.addEventListener('DOMContentLoaded', function(event) {
