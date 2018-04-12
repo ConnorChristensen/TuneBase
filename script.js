@@ -30,6 +30,8 @@ async function getSong(trackID) {
 }
 
 ;(async function() {
+
+  // for each song we have
   for (let song of songs) {
     // check to see if it exists in the database
     let songExists = await getSong(songs[0]['Track ID'])
@@ -51,6 +53,15 @@ async function getSong(trackID) {
       })
     }
   }
+
+  db.playCount.add({
+    trackID: song['Track ID'],
+    date: new Date().getTime(),
+    playCount: song['Play Count']
+  }).catch(function (error) {
+    console.log(error);
+  })
+
 })()
 
 // when the DOM loads
