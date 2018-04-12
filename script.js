@@ -1,5 +1,6 @@
 // import a file reader
 const fs = require('fs')
+const dexie = require('dexie')
 
 // import the text from the file and convert it from binary data to a string
 const iTunesRawData = fs.readFileSync('sample.xml').toString('utf-8')
@@ -15,6 +16,22 @@ let songs = []
 for (let x = 0; x < songArray.length; x+= 1) {
   songs.push(parseSong(songArray[x].innerHTML))
 }
+
+let db = new dexie.Dexie('iTunesData')
+db.version(1).stores({
+  songs: 'name, artist'
+})
+
+db.songs.put({
+  name: songs[2]["Name"],
+  artist: songs[2]["Artist"]
+}).then(function () {
+  return db.songs.get(songs[2]["Name"])
+}).then(function (song) {
+  console.log(song);
+}).catch(function (error) {
+  console.log(error);
+})
 
 // when the DOM loads
 document.addEventListener('DOMContentLoaded', function(event) {

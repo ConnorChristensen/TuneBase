@@ -1,5 +1,3 @@
-'use strict'
-
 // import electron into the app and BrowserWindow variables
 const {app, BrowserWindow} = require('electron')
 
