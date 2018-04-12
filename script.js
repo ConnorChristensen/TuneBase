@@ -22,16 +22,18 @@ db.version(1).stores({
   songs: 'name, artist'
 })
 
-db.songs.put({
-  name: songs[2]["Name"],
-  artist: songs[2]["Artist"]
-}).then(function () {
-  return db.songs.get(songs[2]["Name"])
-}).then(function (song) {
-  console.log(song);
-}).catch(function (error) {
-  console.log(error);
-})
+for (let song of songs) {
+  db.songs.put({
+    name: song["Name"],
+    artist: song["Artist"]
+  }).then(function () {
+    return db.songs.get(song["Name"])
+  }).then(function (enteredSong) {
+    console.log(enteredSong);
+  }).catch(function (error) {
+    console.log(error);
+  })
+}
 
 // when the DOM loads
 document.addEventListener('DOMContentLoaded', function(event) {
