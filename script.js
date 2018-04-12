@@ -19,17 +19,21 @@ for (let x = 0; x < songArray.length; x+= 1) {
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
-  songs: 'name, artist'
+  songs: 'id, name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre'
 })
 
 for (let song of songs) {
-  db.songs.put({
+  db.songs.add({
+    id: song['Track ID'],
     name: song["Name"],
-    artist: song["Artist"]
-  }).then(function () {
-    return db.songs.get(song["Name"])
-  }).then(function (enteredSong) {
-    console.log(enteredSong);
+    artist: song["Artist"],
+    year: song["Year"],
+    dateModified: song["Date Modified"],
+    dateAdded: song['Date Added'],
+    bitRate: song['Bit Rate'],
+    playDate: song['Play date'],
+    album: song['Album'],
+    genre: song['Genre']
   }).catch(function (error) {
     console.log(error);
   })
