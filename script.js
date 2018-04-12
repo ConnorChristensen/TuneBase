@@ -19,7 +19,8 @@ for (let x = 0; x < songArray.length; x+= 1) {
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
-  songs: 'id, name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre'
+  songs: 'id, name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
+  playCount: '++id, trackID, date, playCount'
 })
 
 // an asynchronous function that will return the
