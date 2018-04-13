@@ -57,11 +57,11 @@ function datesMatch(date, now) {
   return false
 }
 
-;(async function() {
+async function logData() {
   // for each song we have
   for (let song of songs) {
     // check to see if it exists in the database
-    let songExists = await getSong(songs[0]['Track ID'])
+    let songExists = await getSong(song['Track ID'])
     // if it does not, then add it
     if (!songExists) {
       db.songs.add({
@@ -110,7 +110,9 @@ function datesMatch(date, now) {
       }
     }
   }
-})()
+}
+
+logData()
 
 // when the DOM loads
 document.addEventListener('DOMContentLoaded', function(event) {
