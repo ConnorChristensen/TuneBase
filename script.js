@@ -29,8 +29,35 @@ async function getSong(trackID) {
   return db.songs.get(trackID)
 }
 
-;(async function() {
+// an asynchronous function that will return the
+// most recent entry for that song
+async function getMostRecentPlayCount(trackID) {
+  /*
+    Search the play count table for that ID,
+    whatever you find, reverse the list and,
+    then sort by date so that the most recent
+    data entry is at position 0
+  */
+  let songPlayCounts = await db.playCount
+      .where('trackID')
+      .equals(trackID)
+      .reverse()
+      .sortBy('date')
 
+  // return that most recent data point
+  return songPlayCounts[0]
+}
+
+function datesMatch(date, now) {
+  if (date.getDate()  !== now.getDate() ||
+      date.getYear()  !== now.getYear() ||
+      date.getMonth() !== now.getMonth()) {
+    return true
+  }
+  return false
+}
+
+;(async function() {
   // for each song we have
   for (let song of songs) {
     // check to see if it exists in the database
@@ -52,16 +79,37 @@ async function getSong(trackID) {
         console.log(error);
       })
     }
+
+    // adds the new play count data set to the database
+    function addPlayCount(trackID, playCount) {
+      return db.playCount.add({
+        trackID: trackID,
+        date: new Date().getTime(),
+        playCount: playCount
+      })
+    }
+
+    // get the most recent play count data for that song
+    let recentData = await getMostRecentPlayCount(song['Track ID'])
+    // if that song does not exist, add it in
+    if (!recentData) {
+      addPlayCount(song['Track ID'], song['Play Count'])
+      .catch(function (error) {
+        console.log(error);
+      })
+    } else {
+      // if the song does exist, get the current date
+      let date = new Date(recentData.date)
+      // if the song element date is not the same date as today,
+      // add the new data
+      if (datesMatch(date, new Date())) {
+      addPlayCount(song['Track ID'], song['Play Count'])
+        .catch(function (error) {
+        console.log(error);
+      })
+      }
+    }
   }
-
-  db.playCount.add({
-    trackID: song['Track ID'],
-    date: new Date().getTime(),
-    playCount: song['Play Count']
-  }).catch(function (error) {
-    console.log(error);
-  })
-
 })()
 
 // when the DOM loads
