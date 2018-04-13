@@ -98,15 +98,18 @@ async function logData() {
         console.log(error);
       })
     } else {
-      // if the song does exist, get the current date
-      let date = new Date(recentData.date)
-      // if the song element date is not the same date as today,
-      // add the new data
-      if (datesMatch(date, new Date())) {
-      addPlayCount(song['Track ID'], song['Play Count'])
-        .catch(function (error) {
-        console.log(error);
-      })
+      // only log it if the play count has changed
+      if (recentData.playCount !== song['Play Count']) {
+        // if the song does exist, get the current date
+        let date = new Date(recentData.date)
+        // if the song element date is not the same date as today,
+        // add the new data
+        if (datesMatch(date, new Date())) {
+          addPlayCount(song['Track ID'], song['Play Count'])
+            .catch(function (error) {
+            console.log(error);
+          })
+        }
       }
     }
   }
