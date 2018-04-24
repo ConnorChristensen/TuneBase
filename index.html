@@ -9,7 +9,14 @@
   <title>TuneBase</title>
 </head>
 <body>
-  <select name="artist" id="artist"></select>
-  <select name="song" id="song"></select>
+  <select name="artist" id="artist" onchange="updateAlbums(this.value)">
+    <option value="">Artist</option>
+  </select>
+  <select name="album" id="album" onchange="updateSongs(this.value)">
+    <option value="">Album</option>
+  </select>
+  <select name="song" id="song">
+    <option value="">Song</option>
+  </select>
 </body>
 </html>

@@ -3,7 +3,7 @@ const fs = require('fs')
 const dexie = require('dexie')
 
 // import the text from the file and convert it from binary data to a string
-const iTunesRawData = fs.readFileSync('sample.xml').toString('utf-8')
+const iTunesRawData = fs.readFileSync('iTunes Library.xml').toString('utf-8')
 
 const parser = new DOMParser();
 const parsedData = parser.parseFromString(iTunesRawData, 'text/xml')
@@ -117,26 +117,94 @@ async function logData() {
 
 logData()
 
+// create an option object to append to a selection
+function createOption(value, text) {
+  // create a new option element
+  let option = document.createElement('option')
+  // set the value of the option
+  option.value = value
+  // set the text the user sees
+  option.innerHTML = text
+  return option
+}
+
+// this is a tree that will hold all the artists, albums and songs
+let songTree = {}
+
 // when the DOM loads
 document.addEventListener('DOMContentLoaded', function(event) {
 
-  // get our artist field
+  // get our artist element
   let artistSelect = document.getElementById('artist')
-  let songSelect = document.getElementById('song')
 
-  // for each song
-  songs.forEach(function (song) {
-    // create a new option element
-    let artistOption = document.createElement('option')
-    // set the value and content to the artist
-    artistOption.value = song.Artist
-    artistOption.innerHTML = song.Artist
-    // append the new option to the artist select tag
-    artistSelect.appendChild(artistOption)
+  // shorthand variables
+  let artist = ""
+  let album = ""
 
-    let songOption = document.createElement('option')
-    songOption.value = song.Name
-    songOption.innerHTML = song.Name
-    songSelect.appendChild(songOption)
-  })
+  for (let song of songs) {
+    // shorthand variables
+    artist = song.Artist
+    album = song.Album
+
+    // if the tree does not have that artist
+    if (!songTree.hasOwnProperty(artist)) {
+      // create an artist object for albums
+      songTree[artist] = {}
+    }
+
+    // if the tree does not have that album
+    if (!songTree[artist].hasOwnProperty(album)) {
+      // create a song array
+      songTree[artist][album] = []
+    }
+
+    // add the song to the album array in the artist object
+    songTree[artist][album].push(song.Name)
+  }
+
+  // for every artist in the song tree
+  for (let artistKey in songTree) {
+    artistSelect.appendChild(createOption(artistKey, artistKey))
+  }
 })
+
+// a global artist value so the update songs function knows what
+// artist to look under
+let selectedArtist = ''
+
+// removes all the options from a selection tag
+function removeOptions(selectbox) {
+  for(let i = selectbox.options.length - 1 ; i >= 0 ; i--) {
+    selectbox.remove(i);
+  }
+}
+
+// updates the albums select to the albums made by that artist
+function updateAlbums(artist) {
+  // when you change the artist, clear out the album and song fields
+  removeOptions(document.getElementById('album'))
+  removeOptions(document.getElementById('song'))
+
+  // get the album tag
+  let albumSelect = document.getElementById('album')
+  // set our global artist for the updateSongs function
+  selectedArtist = artist
+
+  // update the song list with the value of the first album
+  updateSongs(Object.keys(songTree[artist])[0])
+
+  // for each album
+  for (let albumKey in songTree[artist]) {
+    albumSelect.appendChild(createOption(albumKey, albumKey))
+  }
+}
+
+// updates the songs select to the songs in that album
+function updateSongs(album) {
+  // remove all the songs in the song selection
+  removeOptions(document.getElementById('song'))
+  let songSelect = document.getElementById('song')
+  for (let song of songTree[selectedArtist][album]) {
+    songSelect.appendChild(createOption(song, song))
+  }
+}
