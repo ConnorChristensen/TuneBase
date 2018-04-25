@@ -1,6 +1,8 @@
 // import a file reader
 const fs = require('fs')
 const dexie = require('dexie')
+const c3 = require('c3')
+const moment = require('moment')
 
 // import the text from the file and convert it from binary data to a string
 const iTunesRawData = fs.readFileSync('iTunes Library.xml').toString('utf-8')
@@ -39,12 +41,14 @@ async function getPlayHistory(trackID) {
       .equals(trackID)
       .sortBy('date')
   let songArray = {
-    date: [],
-    playCount: []
+    date: ['date'],
+    playCount: ['play count']
   }
   for (let play of songPlayCounts) {
     songArray.playCount.push(play.playCount)
-    songArray.date.push(play.date)
+    songArray.date.push(
+      moment(play.date).format('MM/DD/YY H:m')
+    )
   }
   // return songPlayCounts
   return songArray
@@ -238,9 +242,30 @@ function updateSongs(album) {
 }
 
 function loadSongData(song) {
+  let chart
   // look through the song database and get an array of the play counts with dates
-  db.songs
-    .get({album: selectedAlbum, name: song}, songResponse => {
+  db.songs.get({album: selectedAlbum, name: song}, songResponse => {
       return getPlayHistory(songResponse.id)
-    }).then(e => console.log(e))
+    }).then(function(e) {
+      console.log(e);
+      chart = c3.generate({
+        bindto: '#chart',
+        data: {
+          x: 'date',
+          xFormat: '%m/%d/%Y %H:%M',
+          columns: [e.date, e.playCount]
+        },
+        axis: {
+          x: {
+            type: 'timeseries', // the x axis has a timeseries data type
+            tick: {
+              // the format shown when the mouse hovers over that dot
+              format: '%m/%d %H:%M'
+              // fit: false, if you want to keep the x axis ticks from sticking to the data points
+              // count: 4 if you want to set the ticks to a fixed ammount
+            }
+          }
+        }
+      });
+    })
 }

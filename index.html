@@ -7,16 +7,38 @@
   <script type="text/javascript" src="parser.js"></script>
   <script type="text/javascript" src="script.js"></script>
   <title>TuneBase</title>
+  <link rel="stylesheet" href="node_modules/c3/c3.min.css">
+  <link rel="stylesheet" href="stylesheet.css">
 </head>
 <body>
-  <select name="artist" id="artist" onchange="updateAlbums(this.value)">
-    <option value="">Artist</option>
-  </select>
-  <select name="album" id="album" onchange="updateSongs(this.value)">
-    <option value="">Album</option>
-  </select>
-  <select name="song" id="song" onchange="loadSongData(this.value)">
-    <option value="">Song</option>
-  </select>
+  <div>
+    <table>
+      <tr>
+        <td><h3>Aritst</h3></td>
+        <td>
+          <select name="artist" id="artist" onchange="updateAlbums(this.value)">
+            <option value="">Artist</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td><h3>Album</h3></td>
+        <td>
+          <select name="album" id="album" onchange="updateSongs(this.value)">
+            <option value="">Album</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td><h3>Song</h3></td>
+        <td>
+          <select name="song" id="song" onchange="loadSongData(this.value)">
+            <option value="">Song</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div id="chart"></div>
 </body>
 </html>
