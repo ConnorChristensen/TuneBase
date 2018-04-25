@@ -23,10 +23,31 @@ db.version(1).stores({
   playCount: '++id, trackID, date, playCount'
 })
 
+async function getSongID(song) {
+  return db.songs.where(name).equals(song)
+}
+
 // an asynchronous function that will return the
 // song with that trackID
 async function getSong(trackID) {
   return db.songs.get(trackID)
+}
+
+async function getPlayHistory(trackID) {
+  let songPlayCounts = await db.playCount
+      .where('trackID')
+      .equals(trackID)
+      .sortBy('date')
+  let songArray = {
+    date: [],
+    playCount: []
+  }
+  for (let play of songPlayCounts) {
+    songArray.playCount.push(play.playCount)
+    songArray.date.push(play.date)
+  }
+  // return songPlayCounts
+  return songArray
 }
 
 // an asynchronous function that will return the
@@ -171,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 // a global artist value so the update songs function knows what
 // artist to look under
 let selectedArtist = ''
+let selectedAlbum = ''
 
 // removes all the options from a selection tag
 function removeOptions(selectbox) {
@@ -191,7 +213,9 @@ function updateAlbums(artist) {
   selectedArtist = artist
 
   // update the song list with the value of the first album
-  updateSongs(Object.keys(songTree[artist])[0])
+  let album = Object.keys(songTree[artist])[0]
+  selectedAlbum = album
+  updateSongs(album)
 
   // for each album
   for (let albumKey in songTree[artist]) {
@@ -204,7 +228,19 @@ function updateSongs(album) {
   // remove all the songs in the song selection
   removeOptions(document.getElementById('song'))
   let songSelect = document.getElementById('song')
+  selectedAlbum = album
+
+  loadSongData(songTree[selectedArtist][album][0])
+
   for (let song of songTree[selectedArtist][album]) {
     songSelect.appendChild(createOption(song, song))
   }
+}
+
+function loadSongData(song) {
+  // look through the song database and get an array of the play counts with dates
+  db.songs
+    .get({album: selectedAlbum, name: song}, songResponse => {
+      return getPlayHistory(songResponse.id)
+    }).then(e => console.log(e))
 }
