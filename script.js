@@ -3,10 +3,9 @@ const fs = require('fs')
 const dexie = require('dexie')
 const c3 = require('c3')
 const moment = require('moment')
-
 const timeFormat = 'MM/DD/YY H:mm'
 
-
+// get all the songs from the itunes database
 function getSongsFromFile(fileName) {
   // import the text from the file and convert it from binary data to a string
   const iTunesRawData = fs.readFileSync(fileName).toString('utf-8')
@@ -24,6 +23,7 @@ function getSongsFromFile(fileName) {
   return songs
 }
 
+// checks to see if it is time to update the database
 function timeToUpdate(lastRead) {
   let currentTime = moment().unix()
 
@@ -43,6 +43,11 @@ function timeToUpdate(lastRead) {
 }
 
 // dexie.delete('iTunesData');
+
+
+/******************************************
+*********** CREATE THE DATABASE ***********
+******************************************/
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
@@ -66,6 +71,11 @@ let songs = getSongsFromFile('iTunes Library.xml')
     db.lastRead.put({id: 0, date: moment().unix()})
   }
 })()
+
+
+/************************************************
+*********** DATABASE HELPER FUNCTIONS ***********
+************************************************/
 
 async function getSongID(song) {
   return db.songs.where(name).equals(song)
@@ -99,12 +109,8 @@ async function getPlayHistory(trackID) {
 // an asynchronous function that will return the
 // most recent entry for that song
 async function getMostRecentPlayCount(trackID) {
-  /*
-    Search the play count table for that ID,
-    whatever you find, reverse the list and,
-    then sort by date so that the most recent
-    data entry is at position 0
-  */
+  // Search the play count table for that ID, whatever you find, reverse the list and,
+  // then sort by date so that the most recent data entry is at position 0
   let songPlayCounts = await db.playCount
       .where('trackID')
       .equals(trackID)
@@ -115,21 +121,16 @@ async function getMostRecentPlayCount(trackID) {
   return songPlayCounts[0]
 }
 
-function datesMatch(date, now) {
-  if (date.getDate()  !== now.getDate() ||
-      date.getYear()  !== now.getYear() ||
-      date.getMonth() !== now.getMonth()) {
-    return true
-  }
-  return false
-}
+/***************************************************
+*********** LOG NEW DATA IN THE DATABASE ***********
+****************************************************/
 
 async function logData() {
   // for each song we have
   for (let song of songs) {
     // check to see if it exists in the database
     let songExists = await getSong(song['Track ID'])
-    // if it does not, then add it
+    // if the song does not exist, then add it
     if (!songExists) {
       db.songs.add({
         id: song['Track ID'],
@@ -151,33 +152,19 @@ async function logData() {
     function addPlayCount(trackID, playCount) {
       return db.playCount.add({
         trackID: trackID,
-        date: new Date().getTime(),
+        date: moment().unix(),
         playCount: playCount
       })
     }
 
     // get the most recent play count data for that song
     let recentData = await getMostRecentPlayCount(song['Track ID'])
-    // if that song does not exist, add it in
-    if (!recentData) {
+    // if that song does not exist and the play count has changed, add it
+    if ( !(recentData || recentData.playCount === song['Play Count']) ) {
       addPlayCount(song['Track ID'], song['Play Count'])
       .catch(function (error) {
         console.log(error);
       })
-    } else {
-      // only log it if the play count has changed
-      if (recentData.playCount !== song['Play Count']) {
-        // if the song does exist, get the current date
-        let date = new Date(recentData.date)
-        // if the song element date is not the same date as today,
-        // add the new data
-        if (datesMatch(date, new Date())) {
-          addPlayCount(song['Track ID'], song['Play Count'])
-            .catch(function (error) {
-            console.log(error);
-          })
-        }
-      }
     }
   }
 }
@@ -197,6 +184,10 @@ function createOption(value, text) {
 
 // this is a tree that will hold all the artists, albums and songs
 let songTree = {}
+
+/*********************************************
+*********** WHEN THE APP IS LOADED ***********
+**********************************************/
 
 // when the DOM loads
 document.addEventListener('DOMContentLoaded', function(event) {
@@ -234,6 +225,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
     artistSelect.appendChild(createOption(artistKey, artistKey))
   }
 })
+
+
+/*********************************
+*********** UI UPDATES ***********
+**********************************/
 
 // a global artist value so the update songs function knows what
 // artist to look under
