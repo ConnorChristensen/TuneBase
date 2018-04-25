@@ -4,26 +4,68 @@ const dexie = require('dexie')
 const c3 = require('c3')
 const moment = require('moment')
 
-// import the text from the file and convert it from binary data to a string
-const iTunesRawData = fs.readFileSync('iTunes Library.xml').toString('utf-8')
+const timeFormat = 'MM/DD/YY H:mm'
 
-const parser = new DOMParser();
-const parsedData = parser.parseFromString(iTunesRawData, 'text/xml')
 
-// apple stores the song info several layers deep
-const songArray = parsedData.getElementsByTagName('dict')[0].getElementsByTagName('dict')[0].getElementsByTagName('dict')
+function getSongsFromFile(fileName) {
+  // import the text from the file and convert it from binary data to a string
+  const iTunesRawData = fs.readFileSync(fileName).toString('utf-8')
 
-let songs = []
+  const parser = new DOMParser();
+  const parsedData = parser.parseFromString(iTunesRawData, 'text/xml')
 
-for (let x = 0; x < songArray.length; x+= 1) {
-  songs.push(parseSong(songArray[x].innerHTML))
+  // apple stores the song info several layers deep
+  const songArray = parsedData.getElementsByTagName('dict')[0].getElementsByTagName('dict')[0].getElementsByTagName('dict')
+
+  let songs = []
+  for (let song of songArray) {
+    songs.push(parseSong(song.innerHTML))
+  }
+  return songs
 }
+
+function timeToUpdate(lastRead) {
+  let currentTime = moment().unix()
+
+  // number of hours between sync
+  let hours = 1
+  // number of days between sync
+  let days = 0
+  // number of seconds in an hour
+  let unixHour = 3600
+  // number of seconds in a day
+  let unixDay = unixHour*24
+  // the time between each sync
+  let syncTime = (unixHour*hours) + (unixDay*days)
+
+  // is our current time bigger than the time we need to sync?
+  return currentTime >= (lastRead + syncTime)
+}
+
+// dexie.delete('iTunesData');
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
   songs: 'id, name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
-  playCount: '++id, trackID, date, playCount'
+  playCount: '++id, trackID, date, playCount',
+  lastRead: 'id, date',
 })
+
+let songs = getSongsFromFile('iTunes Library.xml')
+
+// decide whether we need to load new info and update the songs database
+;(async function() {
+
+  // get the last read time of the file
+  let lastRead = await db.lastRead.get(0)
+
+  // if it is time to update the data set
+  if (timeToUpdate(lastRead.date)) {
+    console.log("it is time to update the database");
+    // store the current time in the database
+    db.lastRead.put({id: 0, date: moment().unix()})
+  }
+})()
 
 async function getSongID(song) {
   return db.songs.where(name).equals(song)
@@ -47,7 +89,7 @@ async function getPlayHistory(trackID) {
   for (let play of songPlayCounts) {
     songArray.playCount.push(play.playCount)
     songArray.date.push(
-      moment(play.date).format('MM/DD/YY H:m')
+      moment(play.date).format(timeFormat)
     )
   }
   // return songPlayCounts
@@ -247,7 +289,6 @@ function loadSongData(song) {
   db.songs.get({album: selectedAlbum, name: song}, songResponse => {
       return getPlayHistory(songResponse.id)
     }).then(function(e) {
-      console.log(e);
       chart = c3.generate({
         bindto: '#chart',
         data: {
