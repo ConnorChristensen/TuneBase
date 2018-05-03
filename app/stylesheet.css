@@ -1,0 +1,51 @@
+html, body {
+  margin: 0;
+  padding: 1%;
+  font-family: sans-serif;
+}
+
+html {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+body {
+  background: #eeeeee;
+}
+
+h3, select {
+  padding: 0;
+  margin: 0;
+}
+
+table {
+  margin: auto;
+}
+
+td {
+  margin: 0;
+  padding: 10px;
+}
+
+#chart {
+  max-width: 80vw;
+  min-height: 320px;
+  margin: 5vh auto;
+}
+
+.loader {
+  margin: 0 0 2em;
+  height: 100px;
+  width: 100%;
+  text-align: center;
+  padding: 1em;
+  margin: 0 auto 1em;
+  display: inline-block;
+  vertical-align: top;
+}
+
+svg path, svg rect {
+  fill: #FF6700;
+}

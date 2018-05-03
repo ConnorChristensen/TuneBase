@@ -7,8 +7,8 @@ const url = require('url')
 let win
 
 function createWindow() {
-  // create the browser window
-  win = new BrowserWindow({width: 800, height: 600})
+  // create the browser window without a top bar
+  win = new BrowserWindow({width: 800, height: 600, titleBarStyle: 'hidden'})
 
   // load the index.html of the app
   win.loadURL(url.format({

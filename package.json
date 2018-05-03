@@ -7,12 +7,14 @@
   "author": "ConnorChristensen <chriconn@oregonstate.edu>",
   "license": "MIT",
   "scripts": {
-    "start": "electron ."
+    "start": "electron ./app/"
   },
   "devDependencies": {
     "electron": "^1.8.4"
   },
   "dependencies": {
-    "dexie": "^2.0.2"
+    "c3": "^0.5.4",
+    "dexie": "^2.0.2",
+    "moment": "^2.22.1"
   }
 }
