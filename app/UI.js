@@ -6,7 +6,7 @@ function timeToUpdate(lastRead) {
   let currentTime = moment().unix()
 
   // number of hours between sync
-  let hours = 1
+  let hours = 6
   // number of days between sync
   let days = 0
   // number of seconds in an hour
@@ -49,7 +49,6 @@ let songTree = {}
 
   // if it is time to update the data set
   if (!lastRead || timeToUpdate(lastRead.date)) {
-    console.log("It is time to update the database");
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
     songs = getSongsFromFile(path)
@@ -57,7 +56,6 @@ let songTree = {}
     db.lastRead.put({id: 0, date: moment().unix()})
     // log data runs async, but we want it to be done before we continue
     await logData(songs)
-    console.log("The database is done updating");
   }
   songs = await db.songs.toArray()
   document.getElementById('loadingIcon').style.display = 'none'
