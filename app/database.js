@@ -13,7 +13,7 @@ const timeFormat = 'MM/DD/YY H:mm'
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
-  songs: 'id, name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
+  songs: 'id, [album+name], name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
   playCount: '++id, trackID, date, playCount',
   lastRead: 'id, date',
   sourceFile: 'id, filePath',
