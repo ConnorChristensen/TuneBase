@@ -105,9 +105,16 @@ function loadSelectionFields() {
     songTree[artist][album].push(song.name)
   }
 
-  // for every artist in the song tree
+  let sortedArtistArray = []
+  // for every artist in the song tree add the artist to an array
   for (let artistKey in songTree) {
-    artistSelect.appendChild(createOption(artistKey, artistKey))
+    sortedArtistArray.push(artistKey)
+  }
+
+  sortedArtistArray.sort()
+
+  for (let artist of sortedArtistArray) {
+    artistSelect.appendChild(createOption(artist, artist))
   }
 }
 
