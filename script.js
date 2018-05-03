@@ -17,9 +17,15 @@ function timeToUpdate(lastRead) {
   return currentTime >= (lastRead + syncTime)
 }
 
-let songs = getSongsFromFile('iTunes Library.xml')
+// this is the array of songs
+let songs
 
-// decide whether we need to load new info and update the songs database
+// this is a tree that will hold all the artists, albums and songs
+let songTree = {}
+
+/*****************************************************
+*********** MAIN FUNCTION START OF PROGRAM ***********
+*****************************************************/
 ;(async function() {
 
   // get the last read time of the file
@@ -27,10 +33,15 @@ let songs = getSongsFromFile('iTunes Library.xml')
 
   // if it is time to update the data set
   if (!lastRead || timeToUpdate(lastRead.date)) {
-    console.log("It is time to update the database");
+    // parse the file and get the songs
+    songs = getSongsFromFile('iTunes Library.xml')
     // store the current time in the database
     db.lastRead.put({id: 0, date: moment().unix()})
     logData(songs)
+    loadSelectionFields()
+  } else {
+    songs = await db.songs.toArray()
+    loadSelectionFields()
   }
 })()
 
@@ -50,12 +61,8 @@ function createOption(value, text) {
   return option
 }
 
-// this is a tree that will hold all the artists, albums and songs
-let songTree = {}
-
-// when the DOM loads
-document.addEventListener('DOMContentLoaded', function(event) {
-
+// create our song tree and load the artists into the selection
+function loadSelectionFields() {
   // get our artist element
   let artistSelect = document.getElementById('artist')
 
@@ -65,8 +72,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   for (let song of songs) {
     // shorthand variables
-    artist = song.Artist
-    album = song.Album
+    artist = song.artist
+    album = song.album
 
     // if the tree does not have that artist
     if (!songTree.hasOwnProperty(artist)) {
@@ -88,8 +95,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
   for (let artistKey in songTree) {
     artistSelect.appendChild(createOption(artistKey, artistKey))
   }
-})
-
+}
 
 /*********************************
 *********** UI UPDATES ***********
