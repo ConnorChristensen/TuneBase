@@ -48,6 +48,7 @@ let songTree = {}
 
   // if it is time to update the data set
   if (!lastRead || timeToUpdate(lastRead.date)) {
+    console.log("It is time to update the database");
     // parse the file and get the songs
     songs = getSongsFromFile(path)
     // store the current time in the database

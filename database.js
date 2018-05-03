@@ -46,7 +46,7 @@ async function getPlayHistory(trackID) {
   for (let play of songPlayCounts) {
     songArray.playCount.push(play.playCount)
     songArray.date.push(
-      moment(play.date).format(timeFormat)
+      moment.unix(play.date).format(timeFormat)
     )
   }
   // return songPlayCounts
