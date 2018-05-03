@@ -50,6 +50,9 @@ let songTree = {}
   // if it is time to update the data set
   if (!lastRead || timeToUpdate(lastRead.date)) {
     console.log("It is time to update the database");
+
+    document.getElementById('loadingIcon').style.display = 'block'
+
     // parse the file and get the songs
     songs = getSongsFromFile(path)
     // store the current time in the database
@@ -58,6 +61,7 @@ let songTree = {}
     await logData(songs)
   }
   songs = await db.songs.toArray()
+  document.getElementById('loadingIcon').style.display = 'none'
   loadSelectionFields()
 })()
 
