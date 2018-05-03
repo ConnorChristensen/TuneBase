@@ -33,15 +33,9 @@ let songTree = {}
 
   const sourceFile = await db.sourceFile.get(0)
 
-  // if our source file table has nothing in it
-  if (!sourceFile) {
-    // create an empty space
-    db.sourceFile.put({id: 0, filePath: null})
-  }
-
   let path = ''
   // if our source file path does not exist
-  if (!sourceFile.filePath) {
+  if (!sourceFile || !sourceFile.filePath) {
     // create a dialog
     const { dialog } = require('electron').remote
     // let the user pick the file
@@ -58,12 +52,11 @@ let songTree = {}
     songs = getSongsFromFile(path)
     // store the current time in the database
     db.lastRead.put({id: 0, date: moment().unix()})
-    logData(songs)
-    loadSelectionFields()
-  } else {
-    songs = await db.songs.toArray()
-    loadSelectionFields()
+    // log data runs async, but we want it to be done before we continue
+    await logData(songs)
   }
+  songs = await db.songs.toArray()
+  loadSelectionFields()
 })()
 
 
@@ -109,7 +102,7 @@ function loadSelectionFields() {
     }
 
     // add the song to the album array in the artist object
-    songTree[artist][album].push(song.Name)
+    songTree[artist][album].push(song.name)
   }
 
   // for every artist in the song tree

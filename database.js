@@ -65,7 +65,10 @@ async function getMostRecentPlayCount(trackID) {
       .sortBy('date')
 
   // return that most recent data point
-  return songPlayCounts[0]
+  if (songPlayCounts[0]) {
+    return songPlayCounts[0]
+  }
+  return null
 }
 
 
@@ -125,8 +128,8 @@ async function logData(songs) {
 
     // get the most recent play count data for that song
     let recentData = await getMostRecentPlayCount(song['Track ID'])
-    // if that song does not exist and the play count has changed, add it
-    if ( !(recentData || recentData.playCount === song['Play Count']) ) {
+    // if that song does not exist or the play count has changed, add it
+    if (recentData === null || recentData.playCount !== song['Play Count']) {
       addPlayCount(song['Track ID'], song['Play Count'])
       .catch(function (error) {
         console.log(error);
