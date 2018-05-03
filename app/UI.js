@@ -1,3 +1,6 @@
+// create a dialog
+const { dialog } = require('electron').remote
+
 // checks to see if it is time to update the database
 function timeToUpdate(lastRead) {
   let currentTime = moment().unix()
@@ -36,8 +39,6 @@ let songTree = {}
   let path = ''
   // if our source file path does not exist
   if (!sourceFile || !sourceFile.filePath) {
-    // create a dialog
-    const { dialog } = require('electron').remote
     // let the user pick the file
     path = dialog.showOpenDialog({properties: ['openFile']})[0]
     // set the path in the database
