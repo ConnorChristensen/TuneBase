@@ -31,18 +31,33 @@ let songTree = {}
   // get the last read time of the file
   let lastRead = await db.lastRead.get(0)
 
+  const sourceFile = await db.sourceFile.get(0)
+
+  let path = ''
+  // if our source file path does not exist
+  if (!sourceFile || !sourceFile.filePath) {
+    // create a dialog
+    const { dialog } = require('electron').remote
+    // let the user pick the file
+    path = dialog.showOpenDialog({properties: ['openFile']})[0]
+    // set the path in the database
+    db.sourceFile.put({id: 0, filePath: path})
+  } else {
+    path = sourceFile.filePath
+  }
+
   // if it is time to update the data set
   if (!lastRead || timeToUpdate(lastRead.date)) {
+    console.log("It is time to update the database");
     // parse the file and get the songs
-    songs = getSongsFromFile('iTunes Library.xml')
+    songs = getSongsFromFile(path)
     // store the current time in the database
     db.lastRead.put({id: 0, date: moment().unix()})
-    logData(songs)
-    loadSelectionFields()
-  } else {
-    songs = await db.songs.toArray()
-    loadSelectionFields()
+    // log data runs async, but we want it to be done before we continue
+    await logData(songs)
   }
+  songs = await db.songs.toArray()
+  loadSelectionFields()
 })()
 
 
@@ -88,12 +103,19 @@ function loadSelectionFields() {
     }
 
     // add the song to the album array in the artist object
-    songTree[artist][album].push(song.Name)
+    songTree[artist][album].push(song.name)
   }
 
-  // for every artist in the song tree
+  let sortedArtistArray = []
+  // for every artist in the song tree add the artist to an array
   for (let artistKey in songTree) {
-    artistSelect.appendChild(createOption(artistKey, artistKey))
+    sortedArtistArray.push(artistKey)
+  }
+
+  sortedArtistArray.sort()
+
+  for (let artist of sortedArtistArray) {
+    artistSelect.appendChild(createOption(artist, artist))
   }
 }
 
