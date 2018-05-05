@@ -95,12 +95,20 @@ function getSongsFromFile(fileName) {
 *********** LOG NEW DATA IN THE DATABASE ***********
 ****************************************************/
 async function logData(songs) {
+  const uiLog = document.getElementById('uiLog')
+  let artist
   // for each song we have
   for (let song of songs) {
     // check to see if it exists in the database
-    let songExists = await getSong(song['Track ID'])
+    let dbSong = await getSong(song['Track ID'])
+
+    if (song['Artist'] !== artist) {
+      uiLog.innerHTML = "Adding in " + song['Artist']
+    }
+    artist = song['Artist']
+
     // if the song does not exist, then add it
-    if (!songExists) {
+    if (!dbSong) {
       db.songs.add({
         id: song['Track ID'],
         name: song["Name"],

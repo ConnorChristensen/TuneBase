@@ -49,3 +49,10 @@ td {
 svg path, svg rect {
   fill: #FF6700;
 }
+
+#uiLogParent {
+  width: 300px;
+}
+#uiLog {
+  text-align: left;
+}
