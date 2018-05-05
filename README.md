@@ -1,10 +1,16 @@
 # TuneBase
 An app for tracking data from iTunes over time.
 
+The purpose of this app is not to be fast, or to be used for anything other than
+entertainment, so please be patient with it. 
+This application is supposed to be an easy way to get fun information to both
+Mac and Windows users, and it does that job well.
+
+
 ## Getting started
 When the app first opens up, a file browser will pop up.
-Use that browser to select the file *iTunes Library.xml*.
-This is where iTunes keeps its data on the music in your library.
+Use that browser to select the file **iTunes Library.xml**.
+For locating the iTunes Library file, please consult the iTunes Libaray section
 
 After you select the file, it will not ask for it again.
 
@@ -24,3 +30,20 @@ reads from the file.
 versions of this software.
 * This app will never collect any of your information, the app does not need an
 internet connection to run.
+
+
+## iTunes Library
+Apple makes a nice and reliable operating system, but because they don't need to
+work with anyone else, all the stuff going on behind the scenes are confusing.
+
+iTunes keeps a proprietary **itl** file called **iTunes Library.itl**.
+This file is not human readable, and it is very difficult to interact with it.
+This is what iTunes uses to read and write organization data so it knows what to
+do when it starts up.
+Some developers want to access that information, so Apple created a little
+checkbox for the users to generate a separate XML file.
+
+If you can't find the iTunes Library.xml file, go into iTunes settings and
+check the box in the advanced pane that says "Share iTunes Library XML with
+other applications"
+![alt text](images/generate_itunes_xml.png)
