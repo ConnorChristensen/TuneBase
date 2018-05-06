@@ -18,7 +18,7 @@ function createWindow() {
   }))
 
   // open up the development tools
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 
   win.on('closed', () => {
     // dereference our closed window, we don't need it

@@ -30,8 +30,9 @@ td {
 }
 
 #chart {
-  max-width: 80vw;
-  min-height: 320px;
+  width: 80vw;
+  min-height: 280px;
+  height: 60vh;
   margin: 5vh auto;
 }
 
