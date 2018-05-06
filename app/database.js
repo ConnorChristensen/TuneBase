@@ -139,21 +139,14 @@ async function logData(songs) {
 
     // get the most recent play count data for that song
     let recentData = await getMostRecentPlayCount(songID)
-    // if that song does not exist or the play count has changed, add it
-    if (recentData === null || recentData.playCount !== song['Play Count']) {
-      // if the play count is defined, add it in
-      if (song['Play Count'] != undefined) {
-        addPlayCount(songID, song['Play Count'])
-        .catch(function (error) {
-          console.log(error);
-        })
-      //otherwise, the play count is 0
-      } else {
-        addPlayCount(songID, 0)
-        .catch(function (error) {
-          console.log(error);
-        })
-      }
+
+    // set our dbSong only if recent data exists
+    const dbPlayCount = recentData ? recentData.playCount : null
+    const currPlayCount = song['Play Count'] ? song['Play Count'] : 0
+
+    // if we dont have any recent data points, add it in
+    if (dbPlayCount === null || currPlayCount > dbPlayCount) {
+      addPlayCount(songID, currPlayCount)
     }
   }
 }
