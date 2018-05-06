@@ -3,6 +3,7 @@ const fs = require('fs')
 const dexie = require('dexie')
 const c3 = require('c3')
 const moment = require('moment')
+const sha1 = require('sha1')
 const timeFormat = 'MM/DD/YY H:mm'
 
 
@@ -13,7 +14,7 @@ const timeFormat = 'MM/DD/YY H:mm'
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
-  songs: 'id, [album+name], name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
+  songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
   playCount: '++id, trackID, date, playCount',
   lastRead: 'id, date',
   sourceFile: 'id, filePath',
@@ -95,14 +96,24 @@ function getSongsFromFile(fileName) {
 *********** LOG NEW DATA IN THE DATABASE ***********
 ****************************************************/
 async function logData(songs) {
+  const uiLog = document.getElementById('uiLog')
+  let artist, songID
   // for each song we have
   for (let song of songs) {
+    songID = sha1(song['Artist']+song['Album']+song['Name'])
+
     // check to see if it exists in the database
-    let songExists = await getSong(song['Track ID'])
+    let dbSong = await getSong(songID)
+
+    if (song['Artist'] !== artist) {
+      uiLog.innerHTML = "Adding in " + song['Artist']
+    }
+    artist = song['Artist']
+
     // if the song does not exist, then add it
-    if (!songExists) {
+    if (!dbSong) {
       db.songs.add({
-        id: song['Track ID'],
+        id: songID,
         name: song["Name"],
         artist: song["Artist"],
         year: song["Year"],
@@ -127,13 +138,15 @@ async function logData(songs) {
     }
 
     // get the most recent play count data for that song
-    let recentData = await getMostRecentPlayCount(song['Track ID'])
-    // if that song does not exist or the play count has changed, add it
-    if (recentData === null || recentData.playCount !== song['Play Count']) {
-      addPlayCount(song['Track ID'], song['Play Count'])
-      .catch(function (error) {
-        console.log(error);
-      })
+    let recentData = await getMostRecentPlayCount(songID)
+
+    // set our dbSong only if recent data exists
+    const dbPlayCount = recentData ? recentData.playCount : null
+    const currPlayCount = song['Play Count'] ? song['Play Count'] : 0
+
+    // if we dont have any recent data points, add it in
+    if (dbPlayCount === null || currPlayCount > dbPlayCount) {
+      addPlayCount(songID, currPlayCount)
     }
   }
 }

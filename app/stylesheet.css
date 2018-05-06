@@ -30,8 +30,9 @@ td {
 }
 
 #chart {
-  max-width: 80vw;
-  min-height: 320px;
+  width: 80vw;
+  min-height: 280px;
+  height: 60vh;
   margin: 5vh auto;
 }
 
@@ -48,4 +49,11 @@ td {
 
 svg path, svg rect {
   fill: #FF6700;
+}
+
+#uiLogParent {
+  width: 300px;
+}
+#uiLog {
+  text-align: left;
 }
