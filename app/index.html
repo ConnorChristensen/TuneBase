@@ -36,7 +36,7 @@
       <tr>
         <td><h3>Aritst</h3></td>
         <td>
-          <select name="artist" id="artist" onchange="updateAlbums(this.value)">
+          <select name="artist" id="artist" onchange="uiSelectedArtist(this.value)">
             <option value="">Artist</option>
           </select>
         </td>
@@ -44,7 +44,7 @@
       <tr>
         <td><h3>Album</h3></td>
         <td>
-          <select name="album" id="album" onchange="updateSongs(this.value)">
+          <select name="album" id="album" onchange="uiSelectedAlbum(this.value)">
             <option value="">Album</option>
           </select>
         </td>
@@ -52,7 +52,7 @@
       <tr>
         <td><h3>Song</h3></td>
         <td>
-          <select name="song" id="song" onchange="loadSongData(this.value)">
+          <select name="song" id="song" onchange="uiSelectedSong(this.value)">
             <option value="">Song</option>
           </select>
         </td>

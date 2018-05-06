@@ -138,8 +138,8 @@ function removeOptions(selectbox) {
 }
 
 // updates the albums select to the albums made by that artist
-function updateAlbums(artist) {
-  // when you change the artist, clear out the album and song fields
+function uiSelectedArtist(artist) {
+  // when you change the artist, clear out the album fields
   removeOptions(document.getElementById('album'))
 
   // get the album tag
@@ -155,12 +155,11 @@ function updateAlbums(artist) {
   for (let albumKey in songTree[artist]) {
     albumSelect.appendChild(createOption(albumKey, albumKey))
   }
-
   loadAlbumData(album)
 }
 
 // updates the songs select to the songs in that album
-function updateSongs(album) {
+function uiSelectedAlbum(album) {
   // remove all the songs in the song selection
   removeOptions(document.getElementById('song'))
   let songSelect = document.getElementById('song')
@@ -220,7 +219,7 @@ async function loadAlbumData(album) {
   })
 }
 
-function loadSongData(song) {
+function uiSelectedSong(song) {
   let chart
   // look through the song database and get an array of the play counts with dates
   db.songs.get({album: selectedAlbum, name: song}, songResponse => {
