@@ -216,12 +216,14 @@ async function loadAlbumData(album) {
 }
 
 function uiSelectedSong(song) {
-  let chart
   // look through the song database and get an array of the play counts with dates
   db.songs.get({album: selectedAlbum, name: song}, songResponse => {
       return getPlayHistory(songResponse.id)
     }).then(function(e) {
-      chart = c3.generate({
+      //deep copy the array
+      let values = e.playCount.slice()
+      values.splice(0,1)
+      c3.generate({
         bindto: '#chart',
         data: {
           x: 'date',
@@ -237,6 +239,10 @@ function uiSelectedSong(song) {
               // fit: false, if you want to keep the x axis ticks from sticking to the data points
               // count: 4 if you want to set the ticks to a fixed ammount
             }
+          },
+          y: {
+            min: Math.min.apply(Math, values)-4,
+            max: Math.min.apply(Math, values)+4,
           }
         }
       });
