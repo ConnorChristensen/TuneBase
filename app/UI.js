@@ -131,37 +131,33 @@ let selectedArtist = ''
 let selectedAlbum = ''
 
 // removes all the options from a selection tag
-function removeOptions(selectbox) {
+function removeOptions(selectbox, defaultText) {
   for(let i = selectbox.options.length - 1 ; i >= 0 ; i--) {
     selectbox.remove(i);
   }
+  selectbox.appendChild(createOption("", defaultText))
 }
 
 // updates the albums select to the albums made by that artist
 function uiSelectedArtist(artist) {
   // when you change the artist, clear out the album fields
-  removeOptions(document.getElementById('album'))
+  removeOptions(document.getElementById('album'), 'Album')
 
-  // get the album tag
-  let albumSelect = document.getElementById('album')
   // set our global artist for the updateSongs function
   selectedArtist = artist
 
-  // update the song list with the value of the first album
-  let album = Object.keys(songTree[artist])[0]
-  selectedAlbum = album
 
-  // for each album
+  // get the album tag
+  let albumSelect = document.getElementById('album')
   for (let albumKey in songTree[artist]) {
     albumSelect.appendChild(createOption(albumKey, albumKey))
   }
-  loadAlbumData(album)
 }
 
 // updates the songs select to the songs in that album
 function uiSelectedAlbum(album) {
   // remove all the songs in the song selection
-  removeOptions(document.getElementById('song'))
+  removeOptions(document.getElementById('song'), 'Song')
   let songSelect = document.getElementById('song')
   selectedAlbum = album
 
