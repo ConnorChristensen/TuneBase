@@ -141,7 +141,6 @@ function removeOptions(selectbox) {
 function updateAlbums(artist) {
   // when you change the artist, clear out the album and song fields
   removeOptions(document.getElementById('album'))
-  removeOptions(document.getElementById('song'))
 
   // get the album tag
   let albumSelect = document.getElementById('album')
@@ -151,12 +150,13 @@ function updateAlbums(artist) {
   // update the song list with the value of the first album
   let album = Object.keys(songTree[artist])[0]
   selectedAlbum = album
-  updateSongs(album)
 
   // for each album
   for (let albumKey in songTree[artist]) {
     albumSelect.appendChild(createOption(albumKey, albumKey))
   }
+
+  loadAlbumData(album)
 }
 
 // updates the songs select to the songs in that album
@@ -166,11 +166,58 @@ function updateSongs(album) {
   let songSelect = document.getElementById('song')
   selectedAlbum = album
 
-  loadSongData(songTree[selectedArtist][album][0])
-
   for (let song of songTree[selectedArtist][album]) {
     songSelect.appendChild(createOption(song, song))
   }
+
+  loadAlbumData(album)
+}
+
+// load a graph with all songs on the album by that artist
+async function loadAlbumData(album) {
+  // get all songs on that album made by that artist
+  let albumSongs = await db.songs.where(['album', 'artist']).equals([album, selectedArtist]).toArray()
+  // init our chart data
+  let chartData = {
+    xs: {},
+    columns: []
+  }
+  // for every song in that album by that artist
+  for (let song of albumSongs) {
+    // get the play history of that song
+    let history = await getPlayHistory(song.id)
+    // remove the "date" and "play count" strings in the arrays
+    history.date.splice(0,1)
+    history.playCount.splice(0,1)
+    // set our play count data to have the name of the song
+    let playCountData = [song.name]
+    // set our time data to have the name of the song and " Time"
+    let timeData = [song.name + " Time"]
+    // add in our data, a column with our play count and time
+    chartData.columns.push(playCountData.concat(history.playCount))
+    chartData.columns.push(timeData.concat(history.date))
+    // bind the play count and time arrays together in c3
+    chartData.xs[song.name] = song.name + " Time"
+  }
+  let chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      xs: chartData.xs,
+      xFormat: '%m/%d/%Y %H:%M',
+      columns: chartData.columns,
+    },
+    axis: {
+      x: {
+        type: 'timeseries', // the x axis has a timeseries data type
+        tick: {
+          // the format shown when the mouse hovers over that dot
+          format: '%m/%d %H:%M'
+          // fit: false, if you want to keep the x axis ticks from sticking to the data points
+          // count: 4 if you want to set the ticks to a fixed ammount
+        }
+      }
+    }
+  })
 }
 
 function loadSongData(song) {

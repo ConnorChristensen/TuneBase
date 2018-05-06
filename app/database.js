@@ -14,7 +14,7 @@ const timeFormat = 'MM/DD/YY H:mm'
 
 let db = new dexie.Dexie('iTunesData')
 db.version(1).stores({
-  songs: 'id, [album+name], name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
+  songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
   playCount: '++id, trackID, date, playCount',
   lastRead: 'id, date',
   sourceFile: 'id, filePath',
@@ -141,10 +141,19 @@ async function logData(songs) {
     let recentData = await getMostRecentPlayCount(songID)
     // if that song does not exist or the play count has changed, add it
     if (recentData === null || recentData.playCount !== song['Play Count']) {
-      addPlayCount(songID, song['Play Count'])
-      .catch(function (error) {
-        console.log(error);
-      })
+      // if the play count is defined, add it in
+      if (song['Play Count'] != undefined) {
+        addPlayCount(songID, song['Play Count'])
+        .catch(function (error) {
+          console.log(error);
+        })
+      //otherwise, the play count is 0
+      } else {
+        addPlayCount(songID, 0)
+        .catch(function (error) {
+          console.log(error);
+        })
+      }
     }
   }
 }
