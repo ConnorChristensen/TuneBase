@@ -3,6 +3,7 @@ const fs = require('fs')
 const dexie = require('dexie')
 const c3 = require('c3')
 const moment = require('moment')
+const sha1 = require('sha1')
 const timeFormat = 'MM/DD/YY H:mm'
 
 
@@ -96,11 +97,13 @@ function getSongsFromFile(fileName) {
 ****************************************************/
 async function logData(songs) {
   const uiLog = document.getElementById('uiLog')
-  let artist
+  let artist, songID
   // for each song we have
   for (let song of songs) {
+    songID = sha1(song['Artist']+song['Album']+song['Name'])
+
     // check to see if it exists in the database
-    let dbSong = await getSong(song['Track ID'])
+    let dbSong = await getSong(songID)
 
     if (song['Artist'] !== artist) {
       uiLog.innerHTML = "Adding in " + song['Artist']
@@ -110,7 +113,7 @@ async function logData(songs) {
     // if the song does not exist, then add it
     if (!dbSong) {
       db.songs.add({
-        id: song['Track ID'],
+        id: songID,
         name: song["Name"],
         artist: song["Artist"],
         year: song["Year"],
@@ -135,10 +138,10 @@ async function logData(songs) {
     }
 
     // get the most recent play count data for that song
-    let recentData = await getMostRecentPlayCount(song['Track ID'])
+    let recentData = await getMostRecentPlayCount(songID)
     // if that song does not exist or the play count has changed, add it
     if (recentData === null || recentData.playCount !== song['Play Count']) {
-      addPlayCount(song['Track ID'], song['Play Count'])
+      addPlayCount(songID, song['Play Count'])
       .catch(function (error) {
         console.log(error);
       })
