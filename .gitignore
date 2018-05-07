@@ -59,3 +59,6 @@ typings/
 
 # don't commit the iTunes source files
 *.xml
+
+# don't commit the compiled destination folder
+dist/
