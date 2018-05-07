@@ -201,6 +201,9 @@ async function loadAlbumData(album) {
       xFormat: '%m/%d/%Y %H:%M',
       columns: chartData.columns,
     },
+    zoom: {
+      enabled: true
+    },
     axis: {
       x: {
         type: 'timeseries', // the x axis has a timeseries data type
