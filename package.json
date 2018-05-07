@@ -1,21 +1,35 @@
 {
   "name": "TuneBase",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An app for tracking data from iTunes over time",
-  "main": "index.js",
+  "main": "./app/index.js",
   "repository": "https://github.com/ConnorChristensen/TuneBase.git",
   "author": "ConnorChristensen <chriconn@oregonstate.edu>",
   "license": "MIT",
   "scripts": {
-    "start": "electron ./app/"
+    "start": "electron ./app/",
+    "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^1.8.4"
+    "electron": "^1.8.4",
+    "electron-builder": "^20.11.1"
   },
   "dependencies": {
     "c3": "^0.5.4",
     "dexie": "^2.0.2",
     "moment": "^2.22.1",
     "sha1": "^1.1.1"
+  },
+  "build": {
+    "appId": "com.electron.${name}",
+    "directories": {
+      "output": "./dist/"
+    },
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }
