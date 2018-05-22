@@ -242,10 +242,6 @@ function uiSelectedSong(song) {
               // fit: false, if you want to keep the x axis ticks from sticking to the data points
               // count: 4 if you want to set the ticks to a fixed ammount
             }
-          },
-          y: {
-            min: Math.min.apply(Math, values)-4,
-            max: Math.min.apply(Math, values)+4,
           }
         }
       });
