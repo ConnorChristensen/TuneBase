@@ -6,6 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script type="text/javascript" src="../utils/parser.js"></script>
   <script type="text/javascript" src="../utils/database.js"></script>
+  <script type="text/javascript" src="../../node_modules/vue/dist/vue.js"></script>
   <!-- We will run our parsing and data retreival code when the DOM is loaded -->
   <script type="text/javascript" src="./play_count.js" defer></script>
   <title>TuneBase</title>
@@ -13,6 +14,7 @@
   <link rel="stylesheet" href="../stylesheet.css">
 </head>
 <body>
+  <div id="app">
   <div class="loader" id="loadingIcon" style="display: none">
     <p>Loading</p>
     <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -60,5 +62,6 @@
     </table>
   </div>
   <div id="chart"></div>
+  </div>
 </body>
 </html>
