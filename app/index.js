@@ -12,7 +12,7 @@ function createWindow() {
 
   // load the index.html of the app
   win.loadURL(url.format({
-    pathname: path.join(__dirname, './play_count/play_count.html'),
+    pathname: path.join(__dirname, './home/home.html'),
     protocol: 'file',
     slashes: true
   }))

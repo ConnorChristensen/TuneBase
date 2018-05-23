@@ -1,0 +1,53 @@
+html, body {
+  background: #2B2C36;
+  color: white;
+  font-weight: 100;
+}
+h3 { padding: 10px 0; }
+
+#header {
+  background: #3F404B;
+  margin-bottom: 10px;
+  width: 100vw;
+  text-align: center;
+  padding: 3px 0;
+}
+#header h3 {
+  font-weight: normal;
+  font-size: 18pt;
+}
+
+#content {
+  width: 97vw;
+  min-height: 80vh;
+  text-align: center;
+  margin: auto;
+}
+
+table {
+  text-align: center;
+  margin: 5px 0;
+  width: 100%;
+}
+table th {
+  width: 100%;
+  padding: 10px 0;
+}
+table td {
+  font-weight: 100;
+  padding: 8px 0;
+}
+
+.box {
+  background: #3F404B;
+  padding: 20px;
+}
+.subBox {
+  background: #565766;
+  box-shadow: 1px 1px 10px rgb(40,40,40);
+}
+
+/* make the stroke on the donut charts be the same color
+as the background */
+.c3-chart-arc path { stroke: #565766; }
+#era, #genre { padding: 10px; }
