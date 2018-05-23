@@ -20,14 +20,24 @@ function timeToUpdate(lastRead) {
   return currentTime >= (lastRead + syncTime)
 }
 
+async function setPath() {
+  // get the path to the source file
+  const sourceFile = await db.sourceFile.get(0)
+
+  // if our source file path does not exist
+  if (!sourceFile || !sourceFile.filePath) {
+    // let the user pick the file
+    let path = dialog.showOpenDialog({properties: ['openFile']})[0]
+    // set the path in the database
+    db.sourceFile.put({id: 0, filePath: path})
+    return path
+  }
+  // return the path from the database if it exists
+  return sourceFile.filePath
+}
+
 // the vue object
 let app
-
-// this is the array of songs
-let songs
-
-// this is a tree that will hold all the artists, albums and songs
-let songTree = {}
 
 /*****************************************************
 *********** MAIN FUNCTION START OF PROGRAM ***********
@@ -37,35 +47,30 @@ let songTree = {}
   // get the last read time of the file
   let lastRead = await db.lastRead.get(0)
 
-  const sourceFile = await db.sourceFile.get(0)
-
-  let path = ''
-  // if our source file path does not exist
-  if (!sourceFile || !sourceFile.filePath) {
-    // let the user pick the file
-    path = dialog.showOpenDialog({properties: ['openFile']})[0]
-    // set the path in the database
-    db.sourceFile.put({id: 0, filePath: path})
-  } else {
-    path = sourceFile.filePath
-  }
+  // the raw info where we will store our song info
+  let songs = []
 
   // if it is time to update the data set
   if (!lastRead || timeToUpdate(lastRead.date)) {
+    // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
-    songs = getSongsFromFile(path)
-    // store the current time in the database
+    songs = getSongsFromFile(getPath())
+    // store the current time in the database as the time last read
     db.lastRead.put({id: 0, date: moment().unix()})
     // log data runs async, but we want it to be done before we continue
     await logData(songs)
   }
+  // get all songs from the db, and overwrite the songs from the read in file
+  // the read in file has slightly different key values from what is in the database
   songs = await db.songs.toArray()
+  // hide the loading icon
   document.getElementById('loadingIcon').style.display = 'none'
 
-  let tree = buildSongTree()
+  let tree = buildSongTree(songs)
   let artists = buildArtistsArray(tree)
 
+  // create our vue instance
   app = new Vue({
     el: '#app',
     data: {
@@ -91,7 +96,8 @@ let songTree = {}
       },
       'selected.album': async function() {
         // get all songs on that album made by that artist
-        let albumSongs = await db.songs.where(['album', 'artist']).equals([this.selected.album, this.selected.artist]).toArray()
+        let albumSongs = await db.songs.where(['album', 'artist'])
+                          .equals([this.selected.album, this.selected.artist]).toArray()
 
         // clear all songs
         this.songs = []
@@ -99,8 +105,6 @@ let songTree = {}
         for (let song of albumSongs) {
           this.songs.push(song.name)
         }
-        // sort the songs
-        this.songs.sort()
 
         // init our chart data
         let chartData = {
@@ -179,7 +183,7 @@ let songTree = {}
   })
 })()
 
-function buildSongTree() {
+function buildSongTree(songs) {
   // get our artist element
   let artistSelect = document.getElementById('artist')
 
