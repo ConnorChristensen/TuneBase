@@ -38,24 +38,27 @@
       <tr>
         <td><h3>Artist</h3></td>
         <td>
-          <select name="artist" id="artist" onchange="uiSelectedArtist(this.value)">
+          <select v-model="selected.artist">
             <option value="">Artist</option>
+            <option v-for="artist in artists" v-bind:value="artist">{{artist}}</option>
           </select>
         </td>
       </tr>
       <tr>
         <td><h3>Album</h3></td>
         <td>
-          <select name="album" id="album" onchange="uiSelectedAlbum(this.value)">
+          <select v-model="selected.album">
             <option value="">Album</option>
+            <option v-for="album in albums" v-bind:value="album">{{album}}</option>
           </select>
         </td>
       </tr>
       <tr>
         <td><h3>Song</h3></td>
         <td>
-          <select name="song" id="song" onchange="uiSelectedSong(this.value)">
+          <select v-model="selected.song">
             <option value="">Song</option>
+            <option v-for="song in songs" v-bind:value="song">{{song}}</option>
           </select>
         </td>
       </tr>

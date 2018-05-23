@@ -20,6 +20,9 @@ function timeToUpdate(lastRead) {
   return currentTime >= (lastRead + syncTime)
 }
 
+// the vue object
+let app
+
 // this is the array of songs
 let songs
 
@@ -59,33 +62,131 @@ let songTree = {}
   }
   songs = await db.songs.toArray()
   document.getElementById('loadingIcon').style.display = 'none'
-  loadSelectionFields()
+
+  let tree = buildSongTree()
+  let artists = buildArtistsArray(tree)
+
+  app = new Vue({
+    el: '#app',
+    data: {
+      tree: tree,
+      artists: artists,
+      albums: [],
+      songs: [],
+      selected: {
+        artist: '',
+        album: '',
+        song: '',
+      }
+    },
+    watch: {
+      'selected.artist': function() {
+        // clear all albums
+        this.albums = []
+        // for every album under the artist
+        for (let albumKey in this.tree[this.selected.artist]) {
+          // add that album to our array
+          this.albums.push(albumKey)
+        }
+      },
+      'selected.album': async function() {
+        // get all songs on that album made by that artist
+        let albumSongs = await db.songs.where(['album', 'artist']).equals([this.selected.album, this.selected.artist]).toArray()
+
+        // clear all songs
+        this.songs = []
+        // push all song names into the songs array
+        for (let song of albumSongs) {
+          this.songs.push(song.name)
+        }
+        // sort the songs
+        this.songs.sort()
+
+        // init our chart data
+        let chartData = {
+          xs: {},
+          columns: []
+        }
+        // for every song in that album by that artist
+        for (let song of albumSongs) {
+          // get the play history of that song
+          let history = await getPlayHistory(song.id)
+          // remove the "date" and "play count" strings in the arrays
+          history.date.splice(0,1)
+          history.playCount.splice(0,1)
+          // set our play count data to have the name of the song
+          let playCountData = [song.name]
+          // set our time data to have the name of the song and " Time"
+          let timeData = [song.name + " Time"]
+          // add in our data, a column with our play count and time
+          chartData.columns.push(playCountData.concat(history.playCount))
+          chartData.columns.push(timeData.concat(history.date))
+          // bind the play count and time arrays together in c3
+          chartData.xs[song.name] = song.name + " Time"
+        }
+        let chart = c3.generate({
+          bindto: '#chart',
+          data: {
+            xs: chartData.xs,
+            xFormat: '%m/%d/%Y %H:%M',
+            columns: chartData.columns,
+          },
+          zoom: {
+            enabled: true
+          },
+          axis: {
+            x: {
+              type: 'timeseries', // the x axis has a timeseries data type
+              tick: {
+                // the format shown when the mouse hovers over that dot
+                format: '%m/%d %H:%M'
+                // fit: false, if you want to keep the x axis ticks from sticking to the data points
+                // count: 4 if you want to set the ticks to a fixed ammount
+              }
+            }
+          }
+        })
+      },
+      'selected.song': function() {
+        db.songs.get({album: this.selected.album, name: this.selected.song}, songResponse => {
+          return getPlayHistory(songResponse.id)
+        }).then(function(e) {
+          //deep copy the array
+          let values = e.playCount.slice()
+          values.splice(0,1)
+          c3.generate({
+            bindto: '#chart',
+            data: {
+              x: 'date',
+              xFormat: '%m/%d/%Y %H:%M',
+              columns: [e.date, e.playCount]
+            },
+            axis: {
+              x: {
+                type: 'timeseries', // the x axis has a timeseries data type
+                tick: {
+                  // the format shown when the mouse hovers over that dot
+                  format: '%m/%d %H:%M'
+                  // fit: false, if you want to keep the x axis ticks from sticking to the data points
+                  // count: 4 if you want to set the ticks to a fixed ammount
+                }
+              }
+            }
+          });
+        })
+      }
+    }
+  })
 })()
 
-
-/******************************
-*********** UI CODE ***********
-*******************************/
-
-// create an option object to append to a selection
-function createOption(value, text) {
-  // create a new option element
-  let option = document.createElement('option')
-  // set the value of the option
-  option.value = value
-  // set the text the user sees
-  option.innerHTML = text
-  return option
-}
-
-// create our song tree and load the artists into the selection
-function loadSelectionFields() {
+function buildSongTree() {
   // get our artist element
   let artistSelect = document.getElementById('artist')
 
   // shorthand variables
   let artist = ""
   let album = ""
+  let tree = {}
 
   for (let song of songs) {
     // shorthand variables
@@ -93,157 +194,29 @@ function loadSelectionFields() {
     album = song.album
 
     // if the tree does not have that artist
-    if (!songTree.hasOwnProperty(artist)) {
+    if (!tree.hasOwnProperty(artist)) {
       // create an artist object for albums
-      songTree[artist] = {}
+      tree[artist] = {}
     }
 
     // if the tree does not have that album
-    if (!songTree[artist].hasOwnProperty(album)) {
+    if (!tree[artist].hasOwnProperty(album)) {
       // create a song array
-      songTree[artist][album] = []
+      tree[artist][album] = []
     }
 
     // add the song to the album array in the artist object
-    songTree[artist][album].push(song.name)
+    tree[artist][album].push(song.name)
   }
+  return tree
+}
 
+function buildArtistsArray(tree) {
   let sortedArtistArray = []
   // for every artist in the song tree add the artist to an array
-  for (let artistKey in songTree) {
+  for (let artistKey in tree) {
     sortedArtistArray.push(artistKey)
   }
-
   sortedArtistArray.sort()
-
-  for (let artist of sortedArtistArray) {
-    artistSelect.appendChild(createOption(artist, artist))
-  }
-}
-
-/*********************************
-*********** UI UPDATES ***********
-**********************************/
-
-// a global artist value so the update songs function knows what
-// artist to look under
-let selectedArtist = ''
-let selectedAlbum = ''
-
-// removes all the options from a selection tag
-function removeOptions(selectbox, defaultText) {
-  for(let i = selectbox.options.length - 1 ; i >= 0 ; i--) {
-    selectbox.remove(i);
-  }
-  selectbox.appendChild(createOption("", defaultText))
-}
-
-// updates the albums select to the albums made by that artist
-function uiSelectedArtist(artist) {
-  // when you change the artist, clear out the album fields
-  removeOptions(document.getElementById('album'), 'Album')
-
-  // set our global artist for the updateSongs function
-  selectedArtist = artist
-
-
-  // get the album tag
-  let albumSelect = document.getElementById('album')
-  for (let albumKey in songTree[artist]) {
-    albumSelect.appendChild(createOption(albumKey, albumKey))
-  }
-}
-
-// updates the songs select to the songs in that album
-function uiSelectedAlbum(album) {
-  // remove all the songs in the song selection
-  removeOptions(document.getElementById('song'), 'Song')
-  let songSelect = document.getElementById('song')
-  selectedAlbum = album
-
-  for (let song of songTree[selectedArtist][album]) {
-    songSelect.appendChild(createOption(song, song))
-  }
-
-  loadAlbumData(album)
-}
-
-// load a graph with all songs on the album by that artist
-async function loadAlbumData(album) {
-  // get all songs on that album made by that artist
-  let albumSongs = await db.songs.where(['album', 'artist']).equals([album, selectedArtist]).toArray()
-  // init our chart data
-  let chartData = {
-    xs: {},
-    columns: []
-  }
-  // for every song in that album by that artist
-  for (let song of albumSongs) {
-    // get the play history of that song
-    let history = await getPlayHistory(song.id)
-    // remove the "date" and "play count" strings in the arrays
-    history.date.splice(0,1)
-    history.playCount.splice(0,1)
-    // set our play count data to have the name of the song
-    let playCountData = [song.name]
-    // set our time data to have the name of the song and " Time"
-    let timeData = [song.name + " Time"]
-    // add in our data, a column with our play count and time
-    chartData.columns.push(playCountData.concat(history.playCount))
-    chartData.columns.push(timeData.concat(history.date))
-    // bind the play count and time arrays together in c3
-    chartData.xs[song.name] = song.name + " Time"
-  }
-  let chart = c3.generate({
-    bindto: '#chart',
-    data: {
-      xs: chartData.xs,
-      xFormat: '%m/%d/%Y %H:%M',
-      columns: chartData.columns,
-    },
-    zoom: {
-      enabled: true
-    },
-    axis: {
-      x: {
-        type: 'timeseries', // the x axis has a timeseries data type
-        tick: {
-          // the format shown when the mouse hovers over that dot
-          format: '%m/%d %H:%M'
-          // fit: false, if you want to keep the x axis ticks from sticking to the data points
-          // count: 4 if you want to set the ticks to a fixed ammount
-        }
-      }
-    }
-  })
-}
-
-function uiSelectedSong(song) {
-  // look through the song database and get an array of the play counts with dates
-  db.songs.get({album: selectedAlbum, name: song}, songResponse => {
-      return getPlayHistory(songResponse.id)
-    }).then(function(e) {
-      //deep copy the array
-      let values = e.playCount.slice()
-      values.splice(0,1)
-      c3.generate({
-        bindto: '#chart',
-        data: {
-          x: 'date',
-          xFormat: '%m/%d/%Y %H:%M',
-          columns: [e.date, e.playCount]
-        },
-        axis: {
-          x: {
-            type: 'timeseries', // the x axis has a timeseries data type
-            tick: {
-              // the format shown when the mouse hovers over that dot
-              format: '%m/%d %H:%M'
-              // fit: false, if you want to keep the x axis ticks from sticking to the data points
-              // count: 4 if you want to set the ticks to a fixed ammount
-            }
-          }
-        }
-      });
-    })
+  return sortedArtistArray
 }
