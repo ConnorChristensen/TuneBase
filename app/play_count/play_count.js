@@ -20,7 +20,7 @@ function timeToUpdate(lastRead) {
   return currentTime >= (lastRead + syncTime)
 }
 
-async function setPath() {
+async function getPath() {
   // get the path to the source file
   const sourceFile = await db.sourceFile.get(0)
 
@@ -29,7 +29,7 @@ async function setPath() {
     // let the user pick the file
     let path = dialog.showOpenDialog({properties: ['openFile']})[0]
     // set the path in the database
-    db.sourceFile.put({id: 0, filePath: path})
+    await db.sourceFile.put({id: 0, filePath: path})
     return path
   }
   // return the path from the database if it exists
@@ -55,7 +55,7 @@ let app
     // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
-    songs = getSongsFromFile(getPath())
+    songs = getSongsFromFile(await getPath())
     // store the current time in the database as the time last read
     db.lastRead.put({id: 0, date: moment().unix()})
     // log data runs async, but we want it to be done before we continue
