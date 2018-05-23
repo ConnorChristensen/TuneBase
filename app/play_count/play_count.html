@@ -4,15 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script type="text/javascript" src="parser.js"></script>
-  <script type="text/javascript" src="database.js"></script>
+  <script type="text/javascript" src="../utils/parser.js"></script>
+  <script type="text/javascript" src="../utils/database.js"></script>
+  <script type="text/javascript" src="../../node_modules/vue/dist/vue.js"></script>
   <!-- We will run our parsing and data retreival code when the DOM is loaded -->
-  <script type="text/javascript" src="UI.js" defer></script>
+  <script type="text/javascript" src="./play_count.js" defer></script>
   <title>TuneBase</title>
-  <link rel="stylesheet" href="../node_modules/c3/c3.min.css">
-  <link rel="stylesheet" href="stylesheet.css">
+  <link rel="stylesheet" href="../../node_modules/c3/c3.min.css">
+  <link rel="stylesheet" href="../stylesheet.css">
 </head>
 <body>
+  <div id="app">
   <div class="loader" id="loadingIcon" style="display: none">
     <p>Loading</p>
     <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -34,31 +36,35 @@
   <div>
     <table>
       <tr>
-        <td><h3>Aritst</h3></td>
+        <td><h3>Artist</h3></td>
         <td>
-          <select name="artist" id="artist" onchange="uiSelectedArtist(this.value)">
+          <select v-model="selected.artist">
             <option value="">Artist</option>
+            <option v-for="artist in artists" v-bind:value="artist">{{artist}}</option>
           </select>
         </td>
       </tr>
       <tr>
         <td><h3>Album</h3></td>
         <td>
-          <select name="album" id="album" onchange="uiSelectedAlbum(this.value)">
+          <select v-model="selected.album">
             <option value="">Album</option>
+            <option v-for="album in albums" v-bind:value="album">{{album}}</option>
           </select>
         </td>
       </tr>
       <tr>
         <td><h3>Song</h3></td>
         <td>
-          <select name="song" id="song" onchange="uiSelectedSong(this.value)">
+          <select v-model="selected.song">
             <option value="">Song</option>
+            <option v-for="song in songs" v-bind:value="song">{{song}}</option>
           </select>
         </td>
       </tr>
     </table>
   </div>
   <div id="chart"></div>
+  </div>
 </body>
 </html>
