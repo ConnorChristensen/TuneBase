@@ -1,3 +1,8 @@
+/*
+This is the starting file for the electron app. This is where the setup for the
+windows and the behaviour of the app is defined.
+*/
+
 // import electron into the app and BrowserWindow variables
 const {app, BrowserWindow} = require('electron')
 
@@ -36,7 +41,7 @@ function createWindow() {
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
-  // if you are not in mac, quit the app when closing
+  // if you are not on a mac, quit the app when closing
   // all the windows
   if (process.platform !== 'darwin') {
     app.quit()
