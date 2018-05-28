@@ -1,5 +1,8 @@
 // create a dialog
 const { dialog } = require('electron').remote
+const db = require('../utils/database.js')
+const moment = require('moment')
+const c3 = require('c3')
 
 const Store = require('electron-store')
 const store = new Store()
@@ -47,6 +50,9 @@ let app
 *****************************************************/
 ;(async function() {
 
+  // set up the database
+  db.init()
+
   // get the last read time of the file
   let lastRead = store.get('lastRead')
 
@@ -62,11 +68,11 @@ let app
     // store the current time in the database as the time last read
     store.set('lastRead', moment().unix())
     // log data runs async, but we want it to be done before we continue
-    await logData(songs)
+    await db.logData(songs)
   }
   // get all songs from the db, and overwrite the songs from the read in file
   // the read in file has slightly different key values from what is in the database
-  songs = await db.songs.toArray()
+  songs = await db.getAllSongs()
   // hide the loading icon
   document.getElementById('loadingIcon').style.display = 'none'
 
@@ -99,8 +105,7 @@ let app
       },
       'selected.album': async function() {
         // get all songs on that album made by that artist
-        let albumSongs = await db.songs.where(['album', 'artist'])
-                          .equals([this.selected.album, this.selected.artist]).toArray()
+        let albumSongs = await db.getAllSongsOnAlbumByArtist(this.selected.album, this.selected.artist)
 
         // clear all songs
         this.songs = []
@@ -117,7 +122,7 @@ let app
         // for every song in that album by that artist
         for (let song of albumSongs) {
           // get the play history of that song
-          let history = await getPlayHistory(song.id)
+          let history = await db.getPlayHistory(song.id)
           // remove the "date" and "play count" strings in the arrays
           history.date.splice(0,1)
           history.playCount.splice(0,1)
@@ -155,8 +160,9 @@ let app
         })
       },
       'selected.song': function() {
-        db.songs.get({album: this.selected.album, name: this.selected.song}, songResponse => {
-          return getPlayHistory(songResponse.id)
+        db.getSongFromAlbum(this.selected.song, this.selected.album)
+        .then(songResponse => {
+          return db.getPlayHistory(songResponse.id)
         }).then(function(e) {
           //deep copy the array
           let values = e.playCount.slice()
