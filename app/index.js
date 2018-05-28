@@ -8,7 +8,13 @@ let win
 
 function createWindow() {
   // create the browser window without a top bar
-  win = new BrowserWindow({width: 800, height: 600, titleBarStyle: 'hidden'})
+  win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    titleBarStyle: 'hidden',
+    minWidth: 300,
+    minHeight: 300,
+  })
 
   // load the index.html of the app
   win.loadURL(url.format({
