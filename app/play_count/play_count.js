@@ -1,6 +1,9 @@
 // create a dialog
 const { dialog } = require('electron').remote
 
+const Store = require('electron-store')
+const store = new Store()
+
 // checks to see if it is time to update the database
 function timeToUpdate(lastRead) {
   let currentTime = moment().unix()
@@ -22,14 +25,14 @@ function timeToUpdate(lastRead) {
 
 async function getPath() {
   // get the path to the source file
-  const sourceFile = await db.sourceFile.get(0)
+  const sourceFile = store.get('sourceFile')
 
   // if our source file path does not exist
   if (!sourceFile || !sourceFile.filePath) {
     // let the user pick the file
     let path = dialog.showOpenDialog({properties: ['openFile']})[0]
     // set the path in the database
-    await db.sourceFile.put({id: 0, filePath: path})
+    store.set('sourceFile', path)
     return path
   }
   // return the path from the database if it exists
@@ -45,7 +48,7 @@ let app
 ;(async function() {
 
   // get the last read time of the file
-  let lastRead = await db.lastRead.get(0)
+  let lastRead = store.get('lastRead')
 
   // the raw info where we will store our song info
   let songs = []
@@ -57,7 +60,7 @@ let app
     // parse the file and get the songs
     songs = getSongsFromFile(await getPath())
     // store the current time in the database as the time last read
-    db.lastRead.put({id: 0, date: moment().unix()})
+    store.set('lastRead', moment().unix())
     // log data runs async, but we want it to be done before we continue
     await logData(songs)
   }
