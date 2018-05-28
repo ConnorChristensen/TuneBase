@@ -12,11 +12,12 @@ module.exports = {
   init: function() {
     db = new dexie.Dexie('iTunesData')
     db.version(1).stores({
-      songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, bitRate, playDate, album, genre',
+      songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, rating, albumRating, length, size, trackNumber, bitRate, playDate, album, genre',
       playCount: '++id, trackID, date, playCount',
-      lastRead: 'id, date',
-      sourceFile: 'id, filePath',
     })
+  },
+  destroy: function() {
+    dexie.delete('iTunesData');
   },
   getAllSongs: async function() {
     return db.songs.toArray()
@@ -95,7 +96,7 @@ module.exports = {
       songID = sha1(song['Artist']+song['Album']+song['Name'])
 
       // check to see if it exists in the database
-      let dbSong = await getSong(songID)
+      let dbSong = await this.getSong(songID)
 
       if (song['Artist'] !== artist) {
         uiLog.innerHTML = "Adding in " + song['Artist']
@@ -110,11 +111,16 @@ module.exports = {
           artist: song["Artist"],
           year: song["Year"],
           dateModified: song["Date Modified"],
-          dateAdded: song['Date Added'],
-          bitRate: song['Bit Rate'],
-          playDate: song['Play date'],
-          album: song['Album'],
-          genre: song['Genre']
+          dateAdded: song["Date Added"],
+          rating: song["Rating"],
+          albumRating: song["Album Rating"],
+          length: song["Total Time"],
+          size: song["Size"],
+          trackNumber: song["Track Number"],
+          bitRate: song["Bit Rate"],
+          playDate: song["Play Date"],
+          album: song["Album"],
+          genre: song["Genre"],
         }).catch(function (error) {
           console.log(error);
         })
@@ -130,7 +136,7 @@ module.exports = {
       }
 
       // get the most recent play count data for that song
-      let recentData = await getMostRecentPlayCount(songID)
+      let recentData = await this.getMostRecentPlayCount(songID)
 
       // set our dbSong only if recent data exists
       const dbPlayCount = recentData ? recentData.playCount : null
@@ -143,5 +149,3 @@ module.exports = {
     }
   }
 }
-
-// dexie.delete('iTunesData');
