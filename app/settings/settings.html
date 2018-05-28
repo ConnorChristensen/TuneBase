@@ -19,29 +19,29 @@
     <div id="header">
       <h3>Settings</h3>
     </div>
-  </div>
-  <div id="content">
-    <div class="box">
-      <table>
-        <tbody>
-          <tr>
-            <td><h3>Description</h3></td>
-            <td><h3>Status/Action</h3></td>
-          </tr>
-          <tr>
-            <td>This will scan through your iTunes Library to check if there has been any update data like the year the song was made</td>
-            <td><button>Update</button></td>
-          </tr>
-          <tr>
-            <td>Re-scan the library every</td>
-            <td>
-              <div class="inline">
-                <input type="number">days <input type="number">hours</td>
-              </div>
-          </tr>
-        </tbody>
-      </table>
-      <a href="../home/home.html"><button>Home</button></a>
+    <div id="content">
+      <div class="box">
+        <table>
+          <tbody>
+            <tr>
+              <td><h3>Description</h3></td>
+              <td><h3>Status/Action</h3></td>
+            </tr>
+            <tr>
+              <td>This will scan through your iTunes Library to check if there has been any update data like the year the song was made</td>
+              <td><button v-on:click="updateSongs">Update</button></td>
+            </tr>
+            <tr>
+              <td>Re-scan the library every</td>
+              <td>
+                <div class="inline">
+                  <input type="number">days <input type="number">hours</td>
+                </div>
+            </tr>
+          </tbody>
+        </table>
+        <a href="../home/home.html"><button>Home</button></a>
+      </div>
     </div>
   </div>
 </body>
