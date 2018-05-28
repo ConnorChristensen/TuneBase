@@ -1,0 +1,16 @@
+table {
+  text-align: left;
+}
+
+#playChart {
+  position: relative;
+}
+
+#chart {
+  min-height: 40vh;
+  color: black;
+}
+
+table p {
+  margin: 0; 
+}
