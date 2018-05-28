@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script type="text/javascript" src="../utils/parser.js"></script>
-  <script type="text/javascript" src="../utils/database.js"></script>
   <script type="text/javascript" src="../../node_modules/vue/dist/vue.js"></script>
   <!-- We will run our parsing and data retreival code when the DOM is loaded -->
   <script type="text/javascript" src="./settings.js" defer></script>
@@ -41,6 +40,10 @@
             <tr>
               <td>Back up the database</td>
               <td><button v-on:click="exportDB">Backup</button></td>
+            </tr>
+            <tr>
+              <td>Import a backup file</td>
+              <td><button v-on:click="importDB">Import</button></td>
             </tr>
           </tbody>
         </table>

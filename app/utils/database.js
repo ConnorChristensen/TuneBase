@@ -16,8 +16,30 @@ module.exports = {
       playCount: '++id, trackID, date, playCount',
     })
   },
+  getDB: function() {
+    return db
+  },
+  getTables: function() {
+    return db.tables
+  },
+  tableExists: function(name) {
+    try {
+      db.table(name)
+    } catch (e) {
+      return false
+    }
+    return true
+  },
+  getTable: function(name) {
+    try {
+      db.table(name)
+    } catch (e) {
+      return null
+    }
+    return db.table(name)
+  },
   destroy: function() {
-    dexie.delete('iTunesData');
+    dexie.delete('iTunesData')
   },
   getAllSongs: async function() {
     return db.songs.toArray()
