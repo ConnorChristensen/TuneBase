@@ -31,7 +31,7 @@ async function getPath() {
   const sourceFile = store.get('sourceFile')
 
   // if our source file path does not exist
-  if (!sourceFile || !sourceFile.filePath) {
+  if (!sourceFile) {
     // let the user pick the file
     let path = dialog.showOpenDialog({properties: ['openFile']})[0]
     // set the path in the database
@@ -39,7 +39,7 @@ async function getPath() {
     return path
   }
   // return the path from the database if it exists
-  return sourceFile.filePath
+  return sourceFile
 }
 
 // the vue object
@@ -60,11 +60,11 @@ let app
   let songs = []
 
   // if it is time to update the data set
-  if (!lastRead || timeToUpdate(lastRead.date)) {
+  if (!lastRead || timeToUpdate(lastRead)) {
     // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
-    songs = getSongsFromFile(await getPath())
+    songs = db.getSongsFromFile(await getPath())
     // store the current time in the database as the time last read
     store.set('lastRead', moment().unix())
     // log data runs async, but we want it to be done before we continue
