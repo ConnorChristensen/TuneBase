@@ -3,8 +3,14 @@ const fs = require('fs')
 const dexie = require('dexie')
 const c3 = require('c3')
 const moment = require('moment')
+// for creating the hash of the artist name, album and song to make the ID
 const sha1 = require('sha1')
 const timeFormat = 'MM/DD/YY H:mm'
+// access to stored info in the config file
+const Store = require('electron-store')
+const store = new Store()
+// interact with the user through popup boxes
+const { dialog } = require('electron').remote
 
 let db
 
@@ -109,6 +115,39 @@ module.exports = {
       songs.push(parseSong(song.innerHTML))
     }
     return songs
+  },
+  // checks to see if it is time to update the database
+  timeToUpdate: function (lastRead) {
+    let currentTime = moment().unix()
+
+    // number of hours between sync
+    let hours = .01
+    // number of days between sync
+    let days = 0
+    // number of seconds in an hour
+    let unixHour = 3600
+    // number of seconds in a day
+    let unixDay = unixHour*24
+    // the time between each sync
+    let syncTime = (unixHour*hours) + (unixDay*days)
+
+    // is our current time bigger than the time we need to sync?
+    return currentTime >= (lastRead + syncTime)
+  },
+  getPath: function () {
+    // get the path to the source file
+    const sourceFile = store.get('sourceFile')
+
+    // if our source file path does not exist
+    if (!sourceFile) {
+      // let the user pick the file
+      let path = dialog.showOpenDialog({properties: ['openFile']})[0]
+      // set the path in the database
+      store.set('sourceFile', path)
+      return path
+    }
+    // return the path from the database if it exists
+    return sourceFile
   },
   logData: async function(songs) {
     const uiLog = document.getElementById('uiLog')

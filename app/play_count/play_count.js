@@ -7,41 +7,6 @@ const c3 = require('c3')
 const Store = require('electron-store')
 const store = new Store()
 
-// checks to see if it is time to update the database
-function timeToUpdate(lastRead) {
-  let currentTime = moment().unix()
-
-  // number of hours between sync
-  let hours = 6
-  // number of days between sync
-  let days = 0
-  // number of seconds in an hour
-  let unixHour = 3600
-  // number of seconds in a day
-  let unixDay = unixHour*24
-  // the time between each sync
-  let syncTime = (unixHour*hours) + (unixDay*days)
-
-  // is our current time bigger than the time we need to sync?
-  return currentTime >= (lastRead + syncTime)
-}
-
-async function getPath() {
-  // get the path to the source file
-  const sourceFile = store.get('sourceFile')
-
-  // if our source file path does not exist
-  if (!sourceFile) {
-    // let the user pick the file
-    let path = dialog.showOpenDialog({properties: ['openFile']})[0]
-    // set the path in the database
-    store.set('sourceFile', path)
-    return path
-  }
-  // return the path from the database if it exists
-  return sourceFile
-}
-
 // the vue object
 let app
 
@@ -60,11 +25,11 @@ let app
   let songs = []
 
   // if it is time to update the data set
-  if (!lastRead || timeToUpdate(lastRead)) {
+  if (!lastRead || db.timeToUpdate(lastRead)) {
     // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
-    songs = db.getSongsFromFile(await getPath())
+    songs = db.getSongsFromFile(db.getPath())
     // store the current time in the database as the time last read
     store.set('lastRead', moment().unix())
     // log data runs async, but we want it to be done before we continue
