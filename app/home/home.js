@@ -14,13 +14,13 @@ let app = new Vue({
   },
   beforeMount: async function() {
     db.init()
-    this.songCount = commaNumber( (await db.getAllSongs()).length )
+    this.songCount = commaNumber((await db.getAllSongs()).length)
     const updateUnix = db.timeToUpdate(store.get('lastRead'))
     this.updateTime = moment.unix(updateUnix).format(timeFormat)
   }
 })
 
-let era = c3.generate({
+c3.generate({
   bindto: '#era',
   data: {
     columns: [
@@ -28,16 +28,16 @@ let era = c3.generate({
       ['1980', 5],
       ['1990', 20],
       ['2000', 35],
-      ['2010', 35],
+      ['2010', 35]
     ],
-    type : 'donut'
+    type: 'donut'
   },
   donut: {
-    title: "Songs by Era"
+    title: 'Songs by Era'
   }
 })
 
-let genre = c3.generate({
+c3.generate({
   bindto: '#genre',
   data: {
     columns: [
@@ -45,11 +45,11 @@ let genre = c3.generate({
       ['1980', 5],
       ['1990', 20],
       ['2000', 35],
-      ['2010', 35],
+      ['2010', 35]
     ],
-    type : 'donut'
+    type: 'donut'
   },
   donut: {
-    title: "Songs by Genre"
+    title: 'Songs by Genre'
   }
 })

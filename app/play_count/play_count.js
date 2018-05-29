@@ -1,5 +1,4 @@
 // create a dialog
-const { dialog } = require('electron').remote
 const db = require('../utils/database.js')
 const moment = require('moment')
 const c3 = require('c3')
@@ -14,7 +13,6 @@ let app
 *********** MAIN FUNCTION START OF PROGRAM ***********
 *****************************************************/
 ;(async function() {
-
   // set up the database
   db.init()
 
@@ -55,7 +53,7 @@ let app
       selected: {
         artist: '',
         album: '',
-        song: '',
+        song: ''
       }
     },
     watch: {
@@ -89,24 +87,24 @@ let app
           // get the play history of that song
           let history = await db.getPlayHistory(song.id)
           // remove the "date" and "play count" strings in the arrays
-          history.date.splice(0,1)
-          history.playCount.splice(0,1)
+          history.date.splice(0, 1)
+          history.playCount.splice(0, 1)
           // set our play count data to have the name of the song
           let playCountData = [song.name]
           // set our time data to have the name of the song and " Time"
-          let timeData = [song.name + " Time"]
+          let timeData = [song.name + ' Time']
           // add in our data, a column with our play count and time
           chartData.columns.push(playCountData.concat(history.playCount))
           chartData.columns.push(timeData.concat(history.date))
           // bind the play count and time arrays together in c3
-          chartData.xs[song.name] = song.name + " Time"
+          chartData.xs[song.name] = song.name + ' Time'
         }
         let chart = c3.generate({
           bindto: '#chart',
           data: {
             xs: chartData.xs,
             xFormat: '%m/%d/%Y %H:%M',
-            columns: chartData.columns,
+            columns: chartData.columns
           },
           zoom: {
             enabled: true
@@ -126,44 +124,41 @@ let app
       },
       'selected.song': function() {
         db.getSongFromAlbum(this.selected.song, this.selected.album)
-        .then(songResponse => {
-          return db.getPlayHistory(songResponse.id)
-        }).then(function(e) {
-          //deep copy the array
-          let values = e.playCount.slice()
-          values.splice(0,1)
-          c3.generate({
-            bindto: '#chart',
-            data: {
-              x: 'date',
-              xFormat: '%m/%d/%Y %H:%M',
-              columns: [e.date, e.playCount]
-            },
-            axis: {
-              x: {
-                type: 'timeseries', // the x axis has a timeseries data type
-                tick: {
-                  // the format shown when the mouse hovers over that dot
-                  format: '%m/%d %H:%M'
-                  // fit: false, if you want to keep the x axis ticks from sticking to the data points
-                  // count: 4 if you want to set the ticks to a fixed ammount
+          .then(songResponse => {
+            return db.getPlayHistory(songResponse.id)
+          }).then(function(e) {
+            // deep copy the array
+            let values = e.playCount.slice()
+            values.splice(0, 1)
+            c3.generate({
+              bindto: '#chart',
+              data: {
+                x: 'date',
+                xFormat: '%m/%d/%Y %H:%M',
+                columns: [e.date, e.playCount]
+              },
+              axis: {
+                x: {
+                  type: 'timeseries', // the x axis has a timeseries data type
+                  tick: {
+                    // the format shown when the mouse hovers over that dot
+                    format: '%m/%d %H:%M'
+                    // fit: false, if you want to keep the x axis ticks from sticking to the data points
+                    // count: 4 if you want to set the ticks to a fixed ammount
+                  }
                 }
               }
-            }
-          });
-        })
+            })
+          })
       }
     }
   })
 })()
 
 function buildSongTree(songs) {
-  // get our artist element
-  let artistSelect = document.getElementById('artist')
-
   // shorthand variables
-  let artist = ""
-  let album = ""
+  let artist = ''
+  let album = ''
   let tree = {}
 
   for (let song of songs) {

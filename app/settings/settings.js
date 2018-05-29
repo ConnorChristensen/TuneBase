@@ -42,13 +42,13 @@ let app = new Vue({
         // ask the user for a folder where they can store a backup
         let backupLocation = dialog.showOpenDialog({properties: ['openDirectory']})
         // name the backup file backup.json
-        backupLocation += "/backup.json"
+        backupLocation += '/backup.json'
         // write the the json object to the file
         fs.writeFile(backupLocation, JSON.stringify(e), function(err) {
           // if there is an error, log it
           if (err) { return console.error(err) }
           // let the users know that the data was backed up ok
-          dialog.showMessageBox({type: "info", message: "The data was backed up"})
+          dialog.showMessageBox({type: 'info', message: 'The data was backed up'})
         })
       })
     },
@@ -60,7 +60,7 @@ let app = new Vue({
         buttons: ['OK', 'Cancel']
       })
       // if they said ok
-      if (ok == 0) {
+      if (ok === 0) {
         // start up the database
         db.init()
         // find the location of the backup file
@@ -74,8 +74,7 @@ let app = new Vue({
             // get the table and clear the contents
             db.getTable(t.table).clear()
               // bulk add the rows to the table
-              .then(()=>db.getTable(t.table).bulkAdd(t.rows)
-            )
+              .then(() => db.getTable(t.table).bulkAdd(t.rows))
           }
         })
       }

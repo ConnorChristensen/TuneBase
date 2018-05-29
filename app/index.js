@@ -18,7 +18,7 @@ function createWindow() {
     height: 600,
     titleBarStyle: 'hidden',
     minWidth: 300,
-    minHeight: 300,
+    minHeight: 300
   })
 
   // load the index.html of the app
@@ -36,7 +36,6 @@ function createWindow() {
     win = null
   })
 }
-
 
 app.on('ready', createWindow)
 

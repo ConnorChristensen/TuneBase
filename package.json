@@ -8,12 +8,19 @@
   "license": "MIT",
   "scripts": {
     "start": "electron ./app/",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "lint": "./node_modules/.bin/eslint ./app/**/*.js || true"
   },
   "devDependencies": {
     "devtron": "^1.4.0",
     "electron": "^1.8.4",
-    "electron-builder": "^20.11.1"
+    "electron-builder": "^20.11.1",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0"
   },
   "dependencies": {
     "c3": "^0.5.4",

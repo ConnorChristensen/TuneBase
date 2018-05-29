@@ -1,7 +1,6 @@
 // import a file reader
 const fs = require('fs')
 const dexie = require('dexie')
-const c3 = require('c3')
 const moment = require('moment')
 // for creating the hash of the artist name, album and song to make the ID
 const sha1 = require('sha1')
@@ -19,7 +18,7 @@ module.exports = {
     db = new dexie.Dexie('iTunesData')
     db.version(1).stores({
       songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, rating, albumRating, length, size, trackNumber, bitRate, playDate, album, genre',
-      playCount: '++id, trackID, date, playCount',
+      playCount: '++id, trackID, date, playCount'
     })
   },
   getDB: function() {
@@ -67,9 +66,9 @@ module.exports = {
   // gets an array of dates and play counts of that song when given the song ID
   getPlayHistory: async function(trackID) {
     let songPlayCounts = await db.playCount
-        .where('trackID')
-        .equals(trackID)
-        .sortBy('date')
+      .where('trackID')
+      .equals(trackID)
+      .sortBy('date')
     let songArray = {
       date: ['date'],
       playCount: ['play count']
@@ -88,10 +87,10 @@ module.exports = {
     // Search the play count table for that ID, whatever you find, reverse the list and,
     // then sort by date so that the most recent data entry is at position 0
     let songPlayCounts = await db.playCount
-        .where('trackID')
-        .equals(trackID)
-        .reverse()
-        .sortBy('date')
+      .where('trackID')
+      .equals(trackID)
+      .reverse()
+      .sortBy('date')
 
     // return that most recent data point
     if (songPlayCounts[0]) {
@@ -104,7 +103,7 @@ module.exports = {
     // import the text from the file and convert it from binary data to a string
     const iTunesRawData = fs.readFileSync(fileName).toString('utf-8')
 
-    const parser = new DOMParser();
+    const parser = new DOMParser()
     const parsedData = parser.parseFromString(iTunesRawData, 'text/xml')
 
     // apple stores the song info several layers deep
@@ -117,7 +116,7 @@ module.exports = {
     return songs
   },
   // checks to see if it is time to update the database
-  timeToUpdate: function (lastRead) {
+  timeToUpdate: function(lastRead) {
     // number of hours between sync
     let hours = store.get('hoursSync') || 6
     // number of days between sync
@@ -125,13 +124,13 @@ module.exports = {
     // number of seconds in an hour
     let unixHour = 3600
     // number of seconds in a day
-    let unixDay = unixHour*24
+    let unixDay = unixHour * 24
     // the time between each sync
-    let syncTime = (unixHour*hours) + (unixDay*days)
+    let syncTime = (unixHour * hours) + (unixDay * days)
 
     return (lastRead + syncTime)
   },
-  getPath: function () {
+  getPath: function() {
     // get the path to the source file
     const sourceFile = store.get('sourceFile')
 
@@ -151,31 +150,31 @@ module.exports = {
     let artist, songID
     // for each song we have
     for (let song of songs) {
-      songID = sha1(song['Artist']+song['Album']+song['Name'])
+      songID = sha1(song['Artist'] + song['Album'] + song['Name'])
 
       if (song['Artist'] !== artist) {
-        uiLog.innerHTML = "Adding in " + song['Artist']
+        uiLog.innerHTML = 'Adding in ' + song['Artist']
       }
       artist = song['Artist']
 
       db.songs.put({
         id: songID,
-        name: song["Name"],
-        artist: song["Artist"],
-        year: song["Year"],
-        dateModified: song["Date Modified"],
-        dateAdded: song["Date Added"],
-        rating: song["Rating"],
-        albumRating: song["Album Rating"],
-        length: song["Total Time"],
-        size: song["Size"],
-        trackNumber: song["Track Number"],
-        bitRate: song["Bit Rate"],
-        playDate: song["Play Date"],
-        album: song["Album"],
-        genre: song["Genre"],
-      }).catch(function (error) {
-        console.log(error);
+        name: song['Name'],
+        artist: song['Artist'],
+        year: song['Year'],
+        dateModified: song['Date Modified'],
+        dateAdded: song['Date Added'],
+        rating: song['Rating'],
+        albumRating: song['Album Rating'],
+        length: song['Total Time'],
+        size: song['Size'],
+        trackNumber: song['Track Number'],
+        bitRate: song['Bit Rate'],
+        playDate: song['Play Date'],
+        album: song['Album'],
+        genre: song['Genre']
+      }).catch(function(error) {
+        console.log(error)
       })
 
       // adds the new play count data set to the database
