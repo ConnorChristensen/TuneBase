@@ -1,6 +1,9 @@
 let db = require('../utils/database.js')
 let fs = require('fs')
 
+const Store = require('electron-store')
+const store = new Store()
+
 function createDBObject(db) {
   return db.transaction('r', db.tables, () => {
     return Promise.all(
@@ -15,7 +18,22 @@ const { dialog } = require('electron').remote
 
 let app = new Vue({
   el: '#app',
-  data: {},
+  data: {
+    hours: 0,
+    days: 0
+  },
+  beforeMount: function() {
+    this.hours = store.get('hoursSync') || 6
+    this.days = store.get('daysSync') || 0
+  },
+  watch: {
+    hours: function(value) {
+      store.set('hoursSync', value)
+    },
+    days: function(value) {
+      store.set('daysSync', value)
+    }
+  },
   methods: {
     exportDB: function() {
       db.init()
