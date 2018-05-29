@@ -117,36 +117,30 @@ module.exports = {
     for (let song of songs) {
       songID = sha1(song['Artist']+song['Album']+song['Name'])
 
-      // check to see if it exists in the database
-      let dbSong = await this.getSong(songID)
-
       if (song['Artist'] !== artist) {
         uiLog.innerHTML = "Adding in " + song['Artist']
       }
       artist = song['Artist']
 
-      // if the song does not exist, then add it
-      if (!dbSong) {
-        db.songs.add({
-          id: songID,
-          name: song["Name"],
-          artist: song["Artist"],
-          year: song["Year"],
-          dateModified: song["Date Modified"],
-          dateAdded: song["Date Added"],
-          rating: song["Rating"],
-          albumRating: song["Album Rating"],
-          length: song["Total Time"],
-          size: song["Size"],
-          trackNumber: song["Track Number"],
-          bitRate: song["Bit Rate"],
-          playDate: song["Play Date"],
-          album: song["Album"],
-          genre: song["Genre"],
-        }).catch(function (error) {
-          console.log(error);
-        })
-      }
+      db.songs.put({
+        id: songID,
+        name: song["Name"],
+        artist: song["Artist"],
+        year: song["Year"],
+        dateModified: song["Date Modified"],
+        dateAdded: song["Date Added"],
+        rating: song["Rating"],
+        albumRating: song["Album Rating"],
+        length: song["Total Time"],
+        size: song["Size"],
+        trackNumber: song["Track Number"],
+        bitRate: song["Bit Rate"],
+        playDate: song["Play Date"],
+        album: song["Album"],
+        genre: song["Genre"],
+      }).catch(function (error) {
+        console.log(error);
+      })
 
       // adds the new play count data set to the database
       function addPlayCount(trackID, playCount) {
