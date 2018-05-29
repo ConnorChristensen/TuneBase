@@ -173,7 +173,8 @@ module.exports = {
         name: song['Name'],
         artist: song['Artist'],
         year: song['Year'],
-        playCount: song['Play Count'],
+        // sometimes the play count is undefined, in that case make it 0
+        playCount: (song['Play Count'] || 0),
         dateModified: song['Date Modified'],
         dateAdded: song['Date Added'],
         rating: song['Rating'],
