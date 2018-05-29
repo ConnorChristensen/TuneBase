@@ -16,6 +16,7 @@ function createDBObject(db) {
 
 const { dialog } = require('electron').remote
 
+// eslint-disable-next-line
 let app = new Vue({
   el: '#app',
   data: {

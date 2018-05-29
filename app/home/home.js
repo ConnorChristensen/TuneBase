@@ -6,6 +6,7 @@ const moment = require('moment')
 const Store = require('electron-store')
 const store = new Store()
 
+// eslint-disable-next-line
 let app = new Vue({
   el: '#app',
   data: {

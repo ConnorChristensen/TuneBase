@@ -4,6 +4,8 @@ const dexie = require('dexie')
 const moment = require('moment')
 // for creating the hash of the artist name, album and song to make the ID
 const sha1 = require('sha1')
+const parse = require('../utils/parser.js')
+
 const timeFormat = 'MM/DD/YY H:mm'
 // access to stored info in the config file
 const Store = require('electron-store')
@@ -57,6 +59,7 @@ module.exports = {
   },
   // gets the song ID based off the name
   getSongID: async function(song) {
+    // eslint-disable-next-line no-undef
     return db.songs.where(name).equals(song)
   },
   // gets the song based off the ID
@@ -102,7 +105,7 @@ module.exports = {
   getSongsFromFile: function(fileName) {
     // import the text from the file and convert it from binary data to a string
     const iTunesRawData = fs.readFileSync(fileName).toString('utf-8')
-
+    // eslint-disable-next-line no-undef
     const parser = new DOMParser()
     const parsedData = parser.parseFromString(iTunesRawData, 'text/xml')
 
@@ -111,7 +114,7 @@ module.exports = {
 
     let songs = []
     for (let song of songArray) {
-      songs.push(parseSong(song.innerHTML))
+      songs.push(parse.parseSong(song.innerHTML))
     }
     return songs
   },
@@ -145,6 +148,14 @@ module.exports = {
     // return the path from the database if it exists
     return sourceFile
   },
+  // adds the new play count data set to the database
+  addPlayCount: function(trackID, playCount) {
+    return db.playCount.add({
+      trackID: trackID,
+      date: moment().unix(),
+      playCount: playCount
+    })
+  },
   logData: async function(songs) {
     const uiLog = document.getElementById('uiLog')
     let artist, songID
@@ -177,15 +188,6 @@ module.exports = {
         console.log(error)
       })
 
-      // adds the new play count data set to the database
-      function addPlayCount(trackID, playCount) {
-        return db.playCount.add({
-          trackID: trackID,
-          date: moment().unix(),
-          playCount: playCount
-        })
-      }
-
       // get the most recent play count data for that song
       let recentData = await this.getMostRecentPlayCount(songID)
 
@@ -195,7 +197,7 @@ module.exports = {
 
       // if we dont have any recent data points, add it in
       if (dbPlayCount === null || currPlayCount > dbPlayCount) {
-        addPlayCount(songID, currPlayCount)
+        this.addPlayCount(songID, currPlayCount)
       }
     }
   }

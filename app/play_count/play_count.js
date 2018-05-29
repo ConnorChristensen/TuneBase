@@ -7,6 +7,7 @@ const Store = require('electron-store')
 const store = new Store()
 
 // the vue object
+// eslint-disable-next-line no-unused-vars
 let app
 
 /*****************************************************
@@ -43,6 +44,7 @@ let app
   let artists = buildArtistsArray(tree)
 
   // create our vue instance
+  // eslint-disable-next-line
   app = new Vue({
     el: '#app',
     data: {
@@ -99,7 +101,7 @@ let app
           // bind the play count and time arrays together in c3
           chartData.xs[song.name] = song.name + ' Time'
         }
-        let chart = c3.generate({
+        c3.generate({
           bindto: '#chart',
           data: {
             xs: chartData.xs,
