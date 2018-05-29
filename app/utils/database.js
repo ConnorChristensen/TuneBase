@@ -19,7 +19,7 @@ module.exports = {
   init: function() {
     db = new dexie.Dexie('iTunesData')
     db.version(1).stores({
-      songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, rating, albumRating, length, size, trackNumber, bitRate, playDate, album, genre',
+      songs: 'id, [album+name], [album+artist], name, artist, year, playCount, dateModified, dateAdded, rating, albumRating, length, size, trackNumber, bitRate, playDate, album, genre',
       playCount: '++id, trackID, date, playCount'
     })
   },
@@ -173,6 +173,7 @@ module.exports = {
         name: song['Name'],
         artist: song['Artist'],
         year: song['Year'],
+        playCount: song['Play Count'],
         dateModified: song['Date Modified'],
         dateAdded: song['Date Added'],
         rating: song['Rating'],
