@@ -18,6 +18,7 @@ let app = new Vue({
   data: {},
   methods: {
     exportDB: function() {
+      db.init()
       // create a single object with the contents of the database
       createDBObject(db.getDB()).then(function(e) {
         // ask the user for a folder where they can store a backup
