@@ -1,7 +1,16 @@
 let c3 = require('c3')
+let db = require('../utils/database.js')
+let commaNumber = require('comma-number')
 
 let app = new Vue({
-  el: '#app'
+  el: '#app',
+  data: {
+    songCount: 0
+  },
+  beforeMount: async function() {
+    db.init()
+    this.songCount = commaNumber( (await db.getAllSongs()).length )
+  }
 })
 
 let era = c3.generate({
