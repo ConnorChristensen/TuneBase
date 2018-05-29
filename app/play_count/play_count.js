@@ -25,7 +25,7 @@ let app
   let songs = []
 
   // if it is time to update the data set
-  if (!lastRead || db.timeToUpdate(lastRead)) {
+  if (!lastRead || db.timeToUpdate(lastRead) <= moment().unix()) {
     // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs

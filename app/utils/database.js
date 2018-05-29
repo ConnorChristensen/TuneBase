@@ -118,12 +118,10 @@ module.exports = {
   },
   // checks to see if it is time to update the database
   timeToUpdate: function (lastRead) {
-    let currentTime = moment().unix()
-
     // number of hours between sync
-    let hours = .01
+    let hours = store.get('hoursSync') || 6
     // number of days between sync
-    let days = 0
+    let days = store.get('daysSync') || 0
     // number of seconds in an hour
     let unixHour = 3600
     // number of seconds in a day
@@ -131,8 +129,7 @@ module.exports = {
     // the time between each sync
     let syncTime = (unixHour*hours) + (unixDay*days)
 
-    // is our current time bigger than the time we need to sync?
-    return currentTime >= (lastRead + syncTime)
+    return (lastRead + syncTime)
   },
   getPath: function () {
     // get the path to the source file

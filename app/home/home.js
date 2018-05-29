@@ -1,15 +1,22 @@
 let c3 = require('c3')
 let db = require('../utils/database.js')
 let commaNumber = require('comma-number')
+const timeFormat = 'MM/DD/YY H:mm'
+const moment = require('moment')
+const Store = require('electron-store')
+const store = new Store()
 
 let app = new Vue({
   el: '#app',
   data: {
-    songCount: 0
+    songCount: 0,
+    updateTime: ''
   },
   beforeMount: async function() {
     db.init()
     this.songCount = commaNumber( (await db.getAllSongs()).length )
+    const updateUnix = db.timeToUpdate(store.get('lastRead'))
+    this.updateTime = moment.unix(updateUnix).format(timeFormat)
   }
 })
 
