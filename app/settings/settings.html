@@ -27,14 +27,10 @@
               <td><h3>Status/Action</h3></td>
             </tr>
             <tr>
-              <td>This will scan through your iTunes Library to check if there has been any update data like the year the song was made</td>
-              <td><button>Update</button></td>
-            </tr>
-            <tr>
               <td>Re-scan the library every</td>
               <td>
                 <div class="inline">
-                  <input type="number">days <input type="number">hours</td>
+                  <input type="number" v-model.lazy="days">days <input type="number" v-model.lazy="hours">hours</td>
                 </div>
             </tr>
             <tr>

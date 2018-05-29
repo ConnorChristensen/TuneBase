@@ -3,8 +3,14 @@ const fs = require('fs')
 const dexie = require('dexie')
 const c3 = require('c3')
 const moment = require('moment')
+// for creating the hash of the artist name, album and song to make the ID
 const sha1 = require('sha1')
 const timeFormat = 'MM/DD/YY H:mm'
+// access to stored info in the config file
+const Store = require('electron-store')
+const store = new Store()
+// interact with the user through popup boxes
+const { dialog } = require('electron').remote
 
 let db
 
@@ -110,6 +116,36 @@ module.exports = {
     }
     return songs
   },
+  // checks to see if it is time to update the database
+  timeToUpdate: function (lastRead) {
+    // number of hours between sync
+    let hours = store.get('hoursSync') || 6
+    // number of days between sync
+    let days = store.get('daysSync') || 0
+    // number of seconds in an hour
+    let unixHour = 3600
+    // number of seconds in a day
+    let unixDay = unixHour*24
+    // the time between each sync
+    let syncTime = (unixHour*hours) + (unixDay*days)
+
+    return (lastRead + syncTime)
+  },
+  getPath: function () {
+    // get the path to the source file
+    const sourceFile = store.get('sourceFile')
+
+    // if our source file path does not exist
+    if (!sourceFile) {
+      // let the user pick the file
+      let path = dialog.showOpenDialog({properties: ['openFile']})[0]
+      // set the path in the database
+      store.set('sourceFile', path)
+      return path
+    }
+    // return the path from the database if it exists
+    return sourceFile
+  },
   logData: async function(songs) {
     const uiLog = document.getElementById('uiLog')
     let artist, songID
@@ -117,36 +153,30 @@ module.exports = {
     for (let song of songs) {
       songID = sha1(song['Artist']+song['Album']+song['Name'])
 
-      // check to see if it exists in the database
-      let dbSong = await this.getSong(songID)
-
       if (song['Artist'] !== artist) {
         uiLog.innerHTML = "Adding in " + song['Artist']
       }
       artist = song['Artist']
 
-      // if the song does not exist, then add it
-      if (!dbSong) {
-        db.songs.add({
-          id: songID,
-          name: song["Name"],
-          artist: song["Artist"],
-          year: song["Year"],
-          dateModified: song["Date Modified"],
-          dateAdded: song["Date Added"],
-          rating: song["Rating"],
-          albumRating: song["Album Rating"],
-          length: song["Total Time"],
-          size: song["Size"],
-          trackNumber: song["Track Number"],
-          bitRate: song["Bit Rate"],
-          playDate: song["Play Date"],
-          album: song["Album"],
-          genre: song["Genre"],
-        }).catch(function (error) {
-          console.log(error);
-        })
-      }
+      db.songs.put({
+        id: songID,
+        name: song["Name"],
+        artist: song["Artist"],
+        year: song["Year"],
+        dateModified: song["Date Modified"],
+        dateAdded: song["Date Added"],
+        rating: song["Rating"],
+        albumRating: song["Album Rating"],
+        length: song["Total Time"],
+        size: song["Size"],
+        trackNumber: song["Track Number"],
+        bitRate: song["Bit Rate"],
+        playDate: song["Play Date"],
+        album: song["Album"],
+        genre: song["Genre"],
+      }).catch(function (error) {
+        console.log(error);
+      })
 
       // adds the new play count data set to the database
       function addPlayCount(trackID, playCount) {
