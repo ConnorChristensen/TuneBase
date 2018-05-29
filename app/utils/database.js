@@ -59,8 +59,38 @@ module.exports = {
   },
   // gets the song ID based off the name
   getSongID: async function(song) {
-    // eslint-disable-next-line no-undef
-    return db.songs.where(name).equals(song)
+    return db.songs.where('name').equals(song)
+  },
+  // get all artists in the database
+  getAllArtists: async function() {
+    return db.songs.orderBy('artist').uniqueKeys()
+  },
+  getAllArtistSongs: async function(artist) {
+    return db.songs.where('artist').equals(artist).toArray()
+  },
+  // get the total amount of time listened to an artist
+  getTotalPlayTimeByArtist: async function(artist) {
+    // get all songs by that artist
+    let artistSongs = await this.getAllArtistSongs(artist)
+    // the total number of miliseconds
+    let total = 0
+    for (let song of artistSongs) {
+      // sometimes the song length or play count is undefined
+      // if that is the case, just ignore it instead of killing the total
+      total += (song.length || 0) * (song.playCount || 0)
+    }
+    return total
+  },
+  // logs a list of songs, length and play counts of an artist for testing
+  showArtistSongTimeInfo: async function(artist) {
+    let songs = await this.getAllArtistSongs(artist)
+    for (let song of songs) {
+      console.log({
+        name: song.name,
+        length: (song.length || 0),
+        playCount: (song.playCount || 0)
+      })
+    }
   },
   // gets the song based off the ID
   getSong: async function(trackID) {
