@@ -78,6 +78,7 @@ let app = new Vue({
               .then(() => db.getTable(t.table).bulkAdd(t.rows))
           }
         })
+        dialog.showMessageBox({type: 'info', message: 'The data was successfully imported'})
       }
     }
   }

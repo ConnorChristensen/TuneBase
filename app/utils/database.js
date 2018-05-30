@@ -19,7 +19,7 @@ module.exports = {
   init: function() {
     db = new dexie.Dexie('iTunesData')
     db.version(1).stores({
-      songs: 'id, [album+name], [album+artist], name, artist, year, dateModified, dateAdded, rating, albumRating, length, size, trackNumber, bitRate, playDate, album, genre',
+      songs: 'id, [album+name], [album+artist], name, artist, year, playCount, dateModified, dateAdded, rating, albumRating, length, size, trackNumber, bitRate, playDate, album, genre',
       playCount: '++id, trackID, date, playCount'
     })
   },
@@ -59,8 +59,38 @@ module.exports = {
   },
   // gets the song ID based off the name
   getSongID: async function(song) {
-    // eslint-disable-next-line no-undef
-    return db.songs.where(name).equals(song)
+    return db.songs.where('name').equals(song)
+  },
+  // get all artists in the database
+  getAllArtists: async function() {
+    return db.songs.orderBy('artist').uniqueKeys()
+  },
+  getAllArtistSongs: async function(artist) {
+    return db.songs.where('artist').equals(artist).toArray()
+  },
+  // get the total amount of time listened to an artist
+  getTotalPlayTimeByArtist: async function(artist) {
+    // get all songs by that artist
+    let artistSongs = await this.getAllArtistSongs(artist)
+    // the total number of miliseconds
+    let total = 0
+    for (let song of artistSongs) {
+      // sometimes the song length or play count is undefined
+      // if that is the case, just ignore it instead of killing the total
+      total += (song.length || 0) * (song.playCount || 0)
+    }
+    return total
+  },
+  // logs a list of songs, length and play counts of an artist for testing
+  showArtistSongTimeInfo: async function(artist) {
+    let songs = await this.getAllArtistSongs(artist)
+    for (let song of songs) {
+      console.log({
+        name: song.name,
+        length: (song.length || 0),
+        playCount: (song.playCount || 0)
+      })
+    }
   },
   // gets the song based off the ID
   getSong: async function(trackID) {
@@ -86,18 +116,10 @@ module.exports = {
     return songArray
   },
   // gets the most recent play count entry for that song
-  getMostRecentPlayCount: async function(trackID) {
-    // Search the play count table for that ID, whatever you find, reverse the list and,
-    // then sort by date so that the most recent data entry is at position 0
-    let songPlayCounts = await db.playCount
-      .where('trackID')
-      .equals(trackID)
-      .reverse()
-      .sortBy('date')
-
-    // return that most recent data point
-    if (songPlayCounts[0]) {
-      return songPlayCounts[0]
+  getMostRecentPlayCount: async function(id) {
+    let songPlayCounts = await db.songs.get(id)
+    if (songPlayCounts) {
+      return songPlayCounts.playCount
     }
     return null
   },
@@ -173,6 +195,8 @@ module.exports = {
         name: song['Name'],
         artist: song['Artist'],
         year: song['Year'],
+        // sometimes the play count is undefined, in that case make it 0
+        playCount: (song['Play Count'] || 0),
         dateModified: song['Date Modified'],
         dateAdded: song['Date Added'],
         rating: song['Rating'],
