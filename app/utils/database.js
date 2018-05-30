@@ -190,6 +190,10 @@ module.exports = {
       }
       artist = song['Artist']
 
+      // get the most recent play count data for that song before it is overwritten
+      let recentPlayCount = await this.getMostRecentPlayCount(songID)
+
+      // overwrite the song data in the database
       db.songs.put({
         id: songID,
         name: song['Name'],
@@ -212,15 +216,11 @@ module.exports = {
         console.log(error)
       })
 
-      // get the most recent play count data for that song
-      let recentData = await this.getMostRecentPlayCount(songID)
-
       // set our dbSong only if recent data exists
-      const dbPlayCount = recentData ? recentData.playCount : null
       const currPlayCount = song['Play Count'] ? song['Play Count'] : 0
 
       // if we dont have any recent data points, add it in
-      if (dbPlayCount === null || currPlayCount > dbPlayCount) {
+      if (recentPlayCount === null || currPlayCount > recentPlayCount) {
         this.addPlayCount(songID, currPlayCount)
       }
     }
