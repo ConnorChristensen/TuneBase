@@ -116,18 +116,10 @@ module.exports = {
     return songArray
   },
   // gets the most recent play count entry for that song
-  getMostRecentPlayCount: async function(trackID) {
-    // Search the play count table for that ID, whatever you find, reverse the list and,
-    // then sort by date so that the most recent data entry is at position 0
-    let songPlayCounts = await db.playCount
-      .where('trackID')
-      .equals(trackID)
-      .reverse()
-      .sortBy('date')
-
-    // return that most recent data point
-    if (songPlayCounts[0]) {
-      return songPlayCounts[0]
+  getMostRecentPlayCount: async function(id) {
+    let songPlayCounts = await db.songs.get(id)
+    if (songPlayCounts) {
+      return songPlayCounts.playCount
     }
     return null
   },
