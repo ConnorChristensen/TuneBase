@@ -13,7 +13,8 @@ let app = new Vue({
   data: {
     songCount: 0,
     updateTime: '',
-    totalListenTime: ''
+    totalListenTime: '',
+    totalArtistTime: {}
   },
   beforeMount: async function() {
     db.init()
@@ -95,8 +96,12 @@ let app = new Vue({
     // calculate the total play time
     let time = {h: 0, m: 0, s: 0, ms: 0}
     let artists = await db.getAllArtists()
+    // will store the total play time by artist
+    let timeByArtist = {}
     for (let artist of artists) {
       let artistTime = await db.getTotalPlayTimeByArtist(artist)
+      // store the artist time in an object for processing later
+      timeByArtist[artist] = artistTime
       time = parse.addTime(time, parse.msToTime(artistTime))
     }
     if (time.h > 1000) {
@@ -105,6 +110,13 @@ let app = new Vue({
       this.totalListenTime = `${days}d ${time.h}h ${time.m}m ${time.s}s`
     } else {
       this.totalListenTime = `${commaNumber(time.h)}h ${time.m}m ${time.s}s`
+    }
+
+    // organized list of keys from greatest to least
+    let topList = Object.keys(timeByArtist).sort((a, b) => timeByArtist[b] - timeByArtist[a])
+    for (let x = 0; x < 10; x += 1) {
+      let time = parse.msToTime(timeByArtist[topList[x]])
+      this.totalArtistTime[topList[x]] = `${time.h}h ${time.m}m ${time.s}s`
     }
   }
 })

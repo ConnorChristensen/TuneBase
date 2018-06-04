@@ -40,7 +40,7 @@
             <table>
               <tbody>
               <tr><th colspan="2">Top Artist by Play Time</th></tr>
-              <tr v-for="n in 7"><td>{{n}}. Beck</td><td>{{(8-n)*3}}h 10m</td></tr>
+              <tr v-for="(value, key) in totalArtistTime"><td>{{key}}</td><td>{{value}}</td></tr>
               </tbody>
             </table>
           </div>
