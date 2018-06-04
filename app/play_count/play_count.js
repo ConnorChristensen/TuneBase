@@ -107,7 +107,22 @@ let app
       },
       'selected.album': async function() {
         // get all songs on that album made by that artist
-        let albumSongs = await db.getAllSongsOnAlbumByArtist(this.selected.album, this.selected.artist)
+        const albumSongs = await db.getAllSongsOnAlbumByArtist(this.selected.album, this.selected.artist)
+
+        this.album.songs = albumSongs.length
+        let time = parse.msToTime(await db.getTotalPlayTimeByAlbum(this.selected.album))
+        this.album.playTime = `${time.h}h ${time.m}m ${time.s}s`
+
+        // play count
+        // reset it to 0 when we change artists
+        this.album.playCount = 0
+        for (let song of albumSongs) {
+          this.album.playCount += song.playCount
+        }
+        this.album.year = albumSongs[0].year
+        this.album.genre = albumSongs[0].genre
+        this.album.rating = await db.averageAlbumRating(this.selected.album)
+        this.album.rating += '/100'
 
         // clear all songs
         this.songs = []

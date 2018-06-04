@@ -119,6 +119,18 @@ module.exports = {
     }
     return (rating / songs.length).toPrecision(4)
   },
+  averageAlbumRating: async function(album) {
+    let songs = await db.songs
+      .where('album')
+      .equals(album)
+      .filter(e => e.rating)
+      .toArray()
+    let rating = 0
+    for (let song of songs) {
+      rating += song.rating
+    }
+    return (rating / songs.length).toPrecision(4)
+  },
   getArtistGenre: async function(artist) {
     let songs = await db.songs
       .where('artist')
