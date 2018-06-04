@@ -1,5 +1,6 @@
 // create a dialog
 const db = require('../utils/database.js')
+const parse = require('../utils/parser.js')
 const moment = require('moment')
 const c3 = require('c3')
 
@@ -56,10 +57,26 @@ let app
         artist: '',
         album: '',
         song: ''
+      },
+      album: {
+        songs: 0,
+        playTime: 0,
+        playCount: 0,
+        year: 0,
+        genre: '',
+        rating: 0
+      },
+      artist: {
+        songs: 0,
+        playTime: 0,
+        playCount: 0,
+        yearRange: {},
+        genre: '',
+        rating: 0
       }
     },
     watch: {
-      'selected.artist': function() {
+      'selected.artist': async function() {
         // clear all albums
         this.albums = []
         // for every album under the artist
@@ -67,6 +84,26 @@ let app
           // add that album to our array
           this.albums.push(albumKey)
         }
+
+        // update artist info
+        const artistSongs = await db.getAllArtistSongs(this.selected.artist)
+        this.artist.songs = artistSongs.length
+
+        // play count
+        // reset it to 0 when we change artists
+        this.artist.playCount = 0
+        for (let song of artistSongs) {
+          this.artist.playCount += song.playCount
+        }
+
+        // play time
+        let time = parse.msToTime(await db.getTotalPlayTimeByArtist(this.selected.artist))
+        this.artist.playTime = `${time.h}h ${time.m}m ${time.s}s`
+
+        this.artist.yearRange = await db.artistRangeYear(this.selected.artist)
+        this.artist.rating = await db.averageArtistRating(this.selected.artist)
+
+        this.artist.genre = await db.getArtistGenre(this.selected.artist)
       },
       'selected.album': async function() {
         // get all songs on that album made by that artist

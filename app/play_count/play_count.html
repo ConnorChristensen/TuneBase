@@ -83,27 +83,27 @@
           <tbody>
             <tr>
               <td>Total Songs</td>
-              <td>80</td>
+              <td>{{artist.songs}}</td>
             </tr>
             <tr>
               <td>Total Play Time</td>
-              <td>68h 54m</td>
+              <td>{{artist.playTime}}</td>
             </tr>
             <tr>
               <td>Total Play Count</td>
-              <td>605</td>
+              <td>{{artist.playCount}}</td>
             </tr>
             <tr>
               <td>Year Range</td>
-              <td>2001-2018</td>
+              <td>{{artist.yearRange.start}}-{{artist.yearRange.end}}</td>
             </tr>
             <tr>
               <td>Average Genre</td>
-              <td>Indie</td>
+              <td>{{artist.genre}}</td>
             </tr>
             <tr>
               <td>Average Rating</td>
-              <td>4.85/5</td>
+              <td>{{artist.rating}}/100</td>
             </tr>
           </tbody>
         </table>

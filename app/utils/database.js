@@ -95,6 +95,49 @@ module.exports = {
     }
     return total
   },
+  // the range an artist has been active
+  artistRangeYear: async function(artist) {
+    let songs = await db.songs
+      .where('artist')
+      .equals(artist)
+      .filter(e => e.year)
+      .sortBy('year')
+    return {
+      start: songs[0].year,
+      end: songs[songs.length - 1].year
+    }
+  },
+  averageArtistRating: async function(artist) {
+    let songs = await db.songs
+      .where('artist')
+      .equals(artist)
+      .filter(e => e.rating)
+      .toArray()
+    let rating = 0
+    for (let song of songs) {
+      rating += song.rating
+    }
+    return (rating / songs.length).toPrecision(4)
+  },
+  getArtistGenre: async function(artist) {
+    let songs = await db.songs
+      .where('artist')
+      .equals(artist)
+      .filter(e => e.genre)
+      .toArray()
+    let genres = {}
+    for (let song of songs) {
+      if (genres[song.genre]) {
+        genres[song.genre] += 1
+      } else {
+        genres[song.genre] = 1
+      }
+    }
+    // get a sorted array of the most common to least common genre
+    let genresArr = parse.sortObjectByValue(genres)
+    // return the most common genre
+    return genresArr[0]
+  },
   // logs a list of songs, length and play counts of an artist for testing
   showArtistSongTimeInfo: async function(artist) {
     let songs = await this.getAllArtistSongs(artist)

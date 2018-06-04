@@ -91,5 +91,8 @@ module.exports = {
       s: s,
       ms: ms
     }
+  },
+  sortObjectByValue: function(obj) {
+    return Object.keys(obj).sort((a, b) => obj[b] - obj[a])
   }
 }
