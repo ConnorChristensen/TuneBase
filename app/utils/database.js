@@ -65,8 +65,14 @@ module.exports = {
   getAllArtists: async function() {
     return db.songs.orderBy('artist').uniqueKeys()
   },
+  getAllAlbums: async function() {
+    return db.songs.orderBy('album').uniqueKeys()
+  },
   getAllArtistSongs: async function(artist) {
     return db.songs.where('artist').equals(artist).toArray()
+  },
+  getAllAlbumSongs: async function(album) {
+    return db.songs.where('album').equals(album).toArray()
   },
   // get the total amount of time listened to an artist
   getTotalPlayTimeByArtist: async function(artist) {
@@ -77,6 +83,14 @@ module.exports = {
     for (let song of artistSongs) {
       // sometimes the song length or play count is undefined
       // if that is the case, just ignore it instead of killing the total
+      total += (song.length || 0) * (song.playCount || 0)
+    }
+    return total
+  },
+  getTotalPlayTimeByAlbum: async function(album) {
+    let albumSongs = await this.getAllAlbumSongs(album)
+    let total = 0
+    for (let song of albumSongs) {
       total += (song.length || 0) * (song.playCount || 0)
     }
     return total

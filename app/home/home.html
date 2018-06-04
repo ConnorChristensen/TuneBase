@@ -32,7 +32,7 @@
             <table>
               <tbody>
                 <tr><th colspan="2">Top Album by Play Time</th></tr>
-                <tr v-for="n in 7"><td>{{n}}. Sea Change</td><td>{{(8-n)*10}}h 10m</td></tr>
+                <tr v-for="(value, key) in totalAlbumTime"><td>{{key}}</td><td>{{value}}</td></tr>
               </tbody>
             </table>
           </div>

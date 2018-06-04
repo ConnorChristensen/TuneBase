@@ -14,7 +14,8 @@ let app = new Vue({
     songCount: 0,
     updateTime: '',
     totalListenTime: '',
-    totalArtistTime: {}
+    totalArtistTime: {},
+    totalAlbumTime: {}
   },
   beforeMount: async function() {
     db.init()
@@ -93,6 +94,18 @@ let app = new Vue({
       }
     })
 
+    let albums = await db.getAllAlbums()
+    let timeByAlbum = {}
+    for (let album of albums) {
+      let albumTime = await db.getTotalPlayTimeByAlbum(album)
+      timeByAlbum[album] = albumTime
+    }
+    let topListAlbum = Object.keys(timeByAlbum).sort((a, b) => timeByAlbum[b] - timeByAlbum[a])
+    for (let x = 0; x < 7; x += 1) {
+      let time = parse.msToTime(timeByAlbum[topListAlbum[x]])
+      this.totalAlbumTime[topListAlbum[x]] = `${time.h}h ${time.m}m ${time.s}s`
+    }
+
     // calculate the total play time
     let time = {h: 0, m: 0, s: 0, ms: 0}
     let artists = await db.getAllArtists()
@@ -114,7 +127,7 @@ let app = new Vue({
 
     // organized list of keys from greatest to least
     let topList = Object.keys(timeByArtist).sort((a, b) => timeByArtist[b] - timeByArtist[a])
-    for (let x = 0; x < 10; x += 1) {
+    for (let x = 0; x < 7; x += 1) {
       let time = parse.msToTime(timeByArtist[topList[x]])
       this.totalArtistTime[topList[x]] = `${time.h}h ${time.m}m ${time.s}s`
     }
