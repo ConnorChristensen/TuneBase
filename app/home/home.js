@@ -17,10 +17,82 @@ let app = new Vue({
   },
   beforeMount: async function() {
     db.init()
-    this.songCount = commaNumber((await db.getAllSongs()).length)
+    const allSongs = await db.getAllSongs()
+    this.songCount = commaNumber(allSongs.length)
     const updateUnix = db.timeToUpdate(store.get('lastRead'))
     this.updateTime = moment.unix(updateUnix).format(timeFormat)
 
+    // calculate the decade division
+    let decades = {
+      unknown: 0
+    }
+    let genres = {
+      unknown: 0
+    }
+
+    for (let song of allSongs) {
+      // round the year to the decade
+      let decade = Math.floor(song.year / 10) * 10
+      // if the year is defined
+      if (song.year) {
+        // if the decade is defined
+        if (decades[decade]) {
+          decades[decade] += 1
+        } else {
+          decades[decade] = 1
+        }
+      } else {
+        decades.unknown += 1
+      }
+
+      // if the song genre exits
+      if (song.genre) {
+        if (genres[song.genre]) {
+          genres[song.genre] += 1
+        } else {
+          genres[song.genre] = 1
+        }
+      } else {
+        genres.unknown += 1
+      }
+    }
+
+    // convert the era object into an array of arrays
+    let eraData = []
+    for (let key of Object.keys(decades)) {
+      eraData.push([key, decades[key]])
+    }
+
+    c3.generate({
+      bindto: '#era',
+      data: {
+        columns: eraData,
+        type: 'donut'
+      },
+      donut: {
+        title: 'Songs by Era'
+      }
+    })
+
+    let genreData = []
+    for (let key of Object.keys(genres)) {
+      // as long as the genre makes up more than one percent of the library
+      if (genres[key] > (allSongs.length * 0.01)) {
+        genreData.push([key, genres[key]])
+      }
+    }
+    c3.generate({
+      bindto: '#genre',
+      data: {
+        columns: genreData,
+        type: 'donut'
+      },
+      donut: {
+        title: 'Songs by Genre'
+      }
+    })
+
+    // calculate the total play time
     let time = {h: 0, m: 0, s: 0, ms: 0}
     let artists = await db.getAllArtists()
     for (let artist of artists) {
@@ -34,39 +106,5 @@ let app = new Vue({
     } else {
       this.totalListenTime = `${commaNumber(time.h)}h ${time.m}m ${time.s}s`
     }
-  }
-})
-
-c3.generate({
-  bindto: '#era',
-  data: {
-    columns: [
-      ['1970', 5],
-      ['1980', 5],
-      ['1990', 20],
-      ['2000', 35],
-      ['2010', 35]
-    ],
-    type: 'donut'
-  },
-  donut: {
-    title: 'Songs by Era'
-  }
-})
-
-c3.generate({
-  bindto: '#genre',
-  data: {
-    columns: [
-      ['1970', 5],
-      ['1980', 5],
-      ['1990', 20],
-      ['2000', 35],
-      ['2010', 35]
-    ],
-    type: 'donut'
-  },
-  donut: {
-    title: 'Songs by Genre'
   }
 })
