@@ -6,6 +6,7 @@ const moment = require('moment')
 const Store = require('electron-store')
 const store = new Store()
 const parse = require('../utils/parser.js')
+const d3 = require('d3')
 
 // eslint-disable-next-line
 let app = new Vue({
@@ -72,6 +73,11 @@ let app = new Vue({
         type: 'donut'
       },
       donut: {
+        label: {
+          format: function(value, ratio, id) {
+            return d3.format('')(value)
+          }
+        },
         title: 'Songs by Era'
       }
     })
@@ -90,6 +96,11 @@ let app = new Vue({
         type: 'donut'
       },
       donut: {
+        label: {
+          format: function(value, ratio, id) {
+            return d3.format('')(value)
+          }
+        },
         title: 'Songs by Genre'
       }
     })
