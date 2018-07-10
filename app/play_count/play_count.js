@@ -141,14 +141,24 @@ let app
         // for every song in that album by that artist
         for (let song of albumSongs) {
           // get the play history of that song
-          let history = await db.getPlayHistory(song.id)
+          let history = await db.getPlayHistory(song.id, 'day')
           // set our play count data to have the name of the song
           let playCountData = [song.name]
           // set our time data to have the name of the song and " Time"
           let timeData = [`${song.name} Time`]
+
+          // if the last element in the date array is not today
+          if (history.date[history.date.length - 1] !== moment().format('MM/DD/YY')) {
+            // append on the most recent play count on today
+            // this is so every line reaches the right side of the graph
+            playCountData.push(history.playCount[history.playCount.length - 1])
+            timeData.push(moment().format('MM/DD/YY'))
+          }
+
           // add in our data, a column with our play count and time
           chartData.columns.push(playCountData.concat(history.playCount))
           chartData.columns.push(timeData.concat(history.date))
+
           // bind the play count and time arrays together in c3
           // eg. song X Time is the array of dates for song X play counts
           chartData.xs[song.name] = `${song.name} Time`
@@ -157,8 +167,11 @@ let app
           bindto: '#chart',
           data: {
             xs: chartData.xs,
-            xFormat: '%m/%d/%Y %H:%M',
+            xFormat: '%m/%d/%Y',
             columns: chartData.columns
+          },
+          legend: {
+            position: 'right'
           },
           zoom: {
             enabled: true
@@ -168,7 +181,7 @@ let app
               type: 'timeseries', // the x axis has a timeseries data type
               tick: {
                 // the format shown when the mouse hovers over that dot
-                format: '%m/%d %H:%M'
+                format: '%m/%d'
                 // fit: false, if you want to keep the x axis ticks from sticking to the data points
                 // count: 4 if you want to set the ticks to a fixed ammount
               }
@@ -179,17 +192,15 @@ let app
       'selected.song': function() {
         db.getSongFromAlbum(this.selected.song, this.selected.album)
           .then(songResponse => {
-            return db.getPlayHistory(songResponse.id)
+            return db.getPlayHistory(songResponse.id, 'minute')
           }).then(function(e) {
-            // deep copy the array
-            let values = e.playCount.slice()
-            values.splice(0, 1)
+            console.log([['date'].concat(e.date), ['play'].concat(e.playCount)])
             c3.generate({
               bindto: '#chart',
               data: {
                 x: 'date',
                 xFormat: '%m/%d/%Y %H:%M',
-                columns: [e.date, e.playCount]
+                columns: [['date'].concat(e.date), ['play'].concat(e.playCount)]
               },
               axis: {
                 x: {

@@ -6,7 +6,8 @@ const moment = require('moment')
 const sha1 = require('sha1')
 const parse = require('../utils/parser.js')
 
-const timeFormat = 'MM/DD/YY H:mm'
+const timeMinutePrecision = 'MM/DD/YY HH:mm'
+const timeDayPrecision = 'MM/DD/YY'
 // access to stored info in the config file
 const Store = require('electron-store')
 const store = new Store()
@@ -166,7 +167,7 @@ module.exports = {
     return db.songs.get(trackID)
   },
   // gets an array of dates and play counts of that song when given the song ID
-  getPlayHistory: async function(trackID) {
+  getPlayHistory: async function(trackID, precision) {
     let songPlayCounts = await db.playCount
       .where('trackID')
       .equals(trackID)
@@ -177,9 +178,16 @@ module.exports = {
     }
     for (let play of songPlayCounts) {
       songArray.playCount.push(play.playCount)
-      songArray.date.push(
-        moment.unix(play.date).format(timeFormat)
-      )
+      // if precision is set to day, only return day/month/year
+      if (precision === 'day') {
+        songArray.date.push(
+          moment.unix(play.date).format(timeDayPrecision)
+        )
+      } else {
+        songArray.date.push(
+          moment.unix(play.date).format(timeMinutePrecision)
+        )
+      }
     }
     // return songPlayCounts
     return songArray
