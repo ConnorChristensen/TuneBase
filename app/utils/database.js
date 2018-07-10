@@ -172,8 +172,8 @@ module.exports = {
       .equals(trackID)
       .sortBy('date')
     let songArray = {
-      date: ['date'],
-      playCount: ['play count']
+      date: [],
+      playCount: []
     }
     for (let play of songPlayCounts) {
       songArray.playCount.push(play.playCount)
@@ -240,10 +240,10 @@ module.exports = {
     return sourceFile
   },
   // adds the new play count data set to the database
-  addPlayCount: function(trackID, playCount) {
+  addPlayCount: function(trackID, playCount, time) {
     return db.playCount.add({
       trackID: trackID,
-      date: moment().unix(),
+      date: time,
       playCount: playCount
     })
   },
@@ -280,7 +280,8 @@ module.exports = {
           size: song['Size'],
           trackNumber: song['Track Number'],
           bitRate: song['Bit Rate'],
-          playDate: song['Play Date'],
+          // I don't know why, but apple's Play Date is not in unix time
+          playDate: moment.utc(song['Play Date UTC']).unix(),
           album: song['Album'],
           genre: song['Genre']
         }).catch(function(error) {
@@ -292,7 +293,8 @@ module.exports = {
 
         // if we dont have any recent data points, add it in
         if (recentPlayCount === null || currPlayCount > recentPlayCount) {
-          this.addPlayCount(songID, currPlayCount)
+          let convertedTime = moment.utc(song['Play Date UTC']).unix()
+          this.addPlayCount(songID, currPlayCount, convertedTime)
         }
       }
     }

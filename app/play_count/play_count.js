@@ -133,25 +133,25 @@ let app
 
         // init our chart data
         let chartData = {
+          // links the time x values to the play count y values
           xs: {},
+          // holds the play counts and the play times
           columns: []
         }
         // for every song in that album by that artist
         for (let song of albumSongs) {
           // get the play history of that song
           let history = await db.getPlayHistory(song.id)
-          // remove the "date" and "play count" strings in the arrays
-          history.date.splice(0, 1)
-          history.playCount.splice(0, 1)
           // set our play count data to have the name of the song
           let playCountData = [song.name]
           // set our time data to have the name of the song and " Time"
-          let timeData = [song.name + ' Time']
+          let timeData = [`${song.name} Time`]
           // add in our data, a column with our play count and time
           chartData.columns.push(playCountData.concat(history.playCount))
           chartData.columns.push(timeData.concat(history.date))
           // bind the play count and time arrays together in c3
-          chartData.xs[song.name] = song.name + ' Time'
+          // eg. song X Time is the array of dates for song X play counts
+          chartData.xs[song.name] = `${song.name} Time`
         }
         c3.generate({
           bindto: '#chart',
