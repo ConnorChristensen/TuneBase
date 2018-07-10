@@ -252,45 +252,48 @@ module.exports = {
     let artist, songID
     // for each song we have
     for (let song of songs) {
-      songID = sha1(song['Artist'] + song['Album'] + song['Name'])
+      // if the song is not a podcast
+      if (!song['Podcast']) {
+        songID = sha1(song['Artist'] + song['Album'] + song['Name'])
 
-      if (song['Artist'] !== artist) {
-        uiLog.innerHTML = 'Adding in ' + song['Artist']
-      }
-      artist = song['Artist']
+        if (song['Artist'] !== artist) {
+          uiLog.innerHTML = 'Adding in ' + song['Artist']
+        }
+        artist = song['Artist']
 
-      // get the most recent play count data for that song before it is overwritten
-      let recentPlayCount = await this.getMostRecentPlayCount(songID)
+        // get the most recent play count data for that song before it is overwritten
+        let recentPlayCount = await this.getMostRecentPlayCount(songID)
 
-      // overwrite the song data in the database
-      db.songs.put({
-        id: songID,
-        name: song['Name'],
-        artist: song['Artist'],
-        year: song['Year'],
-        // sometimes the play count is undefined, in that case make it 0
-        playCount: (song['Play Count'] || 0),
-        dateModified: song['Date Modified'],
-        dateAdded: song['Date Added'],
-        rating: song['Rating'],
-        albumRating: song['Album Rating'],
-        length: song['Total Time'],
-        size: song['Size'],
-        trackNumber: song['Track Number'],
-        bitRate: song['Bit Rate'],
-        playDate: song['Play Date'],
-        album: song['Album'],
-        genre: song['Genre']
-      }).catch(function(error) {
-        console.log(error)
-      })
+        // overwrite the song data in the database
+        db.songs.put({
+          id: songID,
+          name: song['Name'],
+          artist: song['Artist'],
+          year: song['Year'],
+          // sometimes the play count is undefined, in that case make it 0
+          playCount: (song['Play Count'] || 0),
+          dateModified: song['Date Modified'],
+          dateAdded: song['Date Added'],
+          rating: song['Rating'],
+          albumRating: song['Album Rating'],
+          length: song['Total Time'],
+          size: song['Size'],
+          trackNumber: song['Track Number'],
+          bitRate: song['Bit Rate'],
+          playDate: song['Play Date'],
+          album: song['Album'],
+          genre: song['Genre']
+        }).catch(function(error) {
+          console.log(error)
+        })
 
-      // set our dbSong only if recent data exists
-      const currPlayCount = song['Play Count'] ? song['Play Count'] : 0
+        // set our dbSong only if recent data exists
+        const currPlayCount = song['Play Count'] ? song['Play Count'] : 0
 
-      // if we dont have any recent data points, add it in
-      if (recentPlayCount === null || currPlayCount > recentPlayCount) {
-        this.addPlayCount(songID, currPlayCount)
+        // if we dont have any recent data points, add it in
+        if (recentPlayCount === null || currPlayCount > recentPlayCount) {
+          this.addPlayCount(songID, currPlayCount)
+        }
       }
     }
   }
