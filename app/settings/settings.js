@@ -62,6 +62,8 @@ let app = new Vue({
       })
       // if they said ok
       if (ok === 0) {
+        // destroy the current database
+        db.destroy()
         // start up the database
         db.init()
         // find the location of the backup file
