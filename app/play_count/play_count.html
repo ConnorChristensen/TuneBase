@@ -4,67 +4,142 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script type="text/javascript" src="../utils/parser.js"></script>
-  <script type="text/javascript" src="../utils/database.js"></script>
   <script type="text/javascript" src="../../node_modules/vue/dist/vue.js"></script>
   <!-- We will run our parsing and data retreival code when the DOM is loaded -->
   <script type="text/javascript" src="./play_count.js" defer></script>
   <title>TuneBase</title>
   <link rel="stylesheet" href="../../node_modules/c3/c3.min.css">
   <link rel="stylesheet" href="../stylesheet.css">
+  <link rel="stylesheet" href="../grid.css">
+  <link rel="stylesheet" href="./play_count.css">
 </head>
 <body>
   <div id="app">
-  <div class="loader" id="loadingIcon" style="display: none">
-    <p>Loading</p>
-    <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-       width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-    <path fill="#000" d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">
-      <animateTransform attributeType="xml"
-        attributeName="transform"
-        type="rotate"
-        from="0 25 25"
-        to="360 25 25"
-        dur="1s"
-        repeatCount="indefinite"/>
-      </path>
-    </svg>
-    <div id="uiLogParent">
-      <p id="uiLog"></p>
+    <div id="header">
+      <h3>Play Count</h3>
     </div>
-  </div>
-  <div>
-    <table>
-      <tr>
-        <td><h3>Artist</h3></td>
-        <td>
-          <select v-model="selected.artist">
-            <option value="">Artist</option>
-            <option v-for="artist in artists" v-bind:value="artist">{{artist}}</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td><h3>Album</h3></td>
-        <td>
-          <select v-model="selected.album">
-            <option value="">Album</option>
-            <option v-for="album in albums" v-bind:value="album">{{album}}</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td><h3>Song</h3></td>
-        <td>
-          <select v-model="selected.song">
-            <option value="">Song</option>
-            <option v-for="song in songs" v-bind:value="song">{{song}}</option>
-          </select>
-        </td>
-      </tr>
-    </table>
-  </div>
-  <div id="chart"></div>
+    <div id="content" class="grid">
+      <div id="nav" class="col-2 md-col-3 sm-col-3 xsm-col-12 box">
+        <h3>More Content</h3>
+        <a href="../home/home.html"><button>Home</button></a>
+        <a href="../settings/settings.html"><button>Settings</button></a>
+        <div class="loader" id="loadingIcon" style="display: none">
+          <p>Loading</p>
+          <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+             width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+          <path fill="#000" d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">
+            <animateTransform attributeType="xml"
+              attributeName="transform"
+              type="rotate"
+              from="0 25 25"
+              to="360 25 25"
+              dur="1s"
+              repeatCount="indefinite"/>
+            </path>
+          </svg>
+          <div id="uiLogParent">
+            <p id="uiLog"></p>
+          </div>
+        </div>
+      </div>
+      <div id="selection" class="col-4 md-col-9 sm-col-9 xsm-col-12 box">
+        <h3>Selection</h3>
+        <table>
+          <tr>
+            <td>
+              <p>Artist</p>
+              <select v-model="selected.artist">
+                <option value="">Artist</option>
+                <option v-for="artist in artists" v-bind:value="artist">{{artist.substring(0, 50)}}</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>Album</p>
+              <select v-model="selected.album">
+                <option value="">Album</option>
+                <option v-for="album in albums" v-bind:value="album">{{album}}</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>Song</p>
+              <select v-model="selected.song">
+                <option value="">Song</option>
+                <option v-for="song in songs" v-bind:value="song">{{song}}</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="playChart" class="col-12 md-col-12 sm-col-12 xms-col-12 box">
+        <div id="chart"></div>
+      </div>
+      <div id="artistInfo" class="col-3 md-col-6 sm-col-6 xsm-col-12 box">
+        <h3>Artist Info</h3>
+        <table>
+          <tbody>
+            <tr>
+              <td>Total Songs</td>
+              <td>{{artist.songs}}</td>
+            </tr>
+            <tr>
+              <td>Total Play Time</td>
+              <td>{{artist.playTime}}</td>
+            </tr>
+            <tr>
+              <td>Total Play Count</td>
+              <td>{{artist.playCount}}</td>
+            </tr>
+            <tr>
+              <td>Year Range</td>
+              <td>{{artist.yearRange.start}}-{{artist.yearRange.end}}</td>
+            </tr>
+            <tr>
+              <td>Average Genre</td>
+              <td>{{artist.genre}}</td>
+            </tr>
+            <tr>
+              <td>Average Rating</td>
+              <td>{{artist.rating}}/100</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="albumInfo" class="col-3 md-col-6 sm-col-6 xsm-col-12 box">
+        <h3>Album Info</h3>
+        <table>
+          <tbody>
+            <tr>
+              <td>Songs</td>
+              <td>{{album.songs}}</td>
+            </tr>
+            <tr>
+              <td>Total Play Time</td>
+              <td>{{album.playTime}}</td>
+            </tr>
+            <tr>
+              <td>Total Play Count</td>
+              <td>{{album.playCount}}</td>
+            </tr>
+            <tr>
+              <td>Year</td>
+              <td>{{album.year}}</td>
+            </tr>
+            <tr>
+              <td>Genre</td>
+              <td>{{album.genre}}</td>
+            </tr>
+            <tr>
+              <td>Average Rating</td>
+              <td>{{album.rating}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </body>
 </html>

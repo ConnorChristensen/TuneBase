@@ -1,69 +1,43 @@
 // create a dialog
-const { dialog } = require('electron').remote
+const db = require('../utils/database.js')
+const parse = require('../utils/parser.js')
+const moment = require('moment')
+const c3 = require('c3')
 
-// checks to see if it is time to update the database
-function timeToUpdate(lastRead) {
-  let currentTime = moment().unix()
-
-  // number of hours between sync
-  let hours = 6
-  // number of days between sync
-  let days = 0
-  // number of seconds in an hour
-  let unixHour = 3600
-  // number of seconds in a day
-  let unixDay = unixHour*24
-  // the time between each sync
-  let syncTime = (unixHour*hours) + (unixDay*days)
-
-  // is our current time bigger than the time we need to sync?
-  return currentTime >= (lastRead + syncTime)
-}
-
-async function setPath() {
-  // get the path to the source file
-  const sourceFile = await db.sourceFile.get(0)
-
-  // if our source file path does not exist
-  if (!sourceFile || !sourceFile.filePath) {
-    // let the user pick the file
-    let path = dialog.showOpenDialog({properties: ['openFile']})[0]
-    // set the path in the database
-    db.sourceFile.put({id: 0, filePath: path})
-    return path
-  }
-  // return the path from the database if it exists
-  return sourceFile.filePath
-}
+const Store = require('electron-store')
+const store = new Store()
 
 // the vue object
+// eslint-disable-next-line no-unused-vars
 let app
 
 /*****************************************************
 *********** MAIN FUNCTION START OF PROGRAM ***********
 *****************************************************/
 ;(async function() {
+  // set up the database
+  db.init()
 
   // get the last read time of the file
-  let lastRead = await db.lastRead.get(0)
+  let lastRead = store.get('lastRead')
 
   // the raw info where we will store our song info
   let songs = []
 
   // if it is time to update the data set
-  if (!lastRead || timeToUpdate(lastRead.date)) {
+  if (!lastRead || db.timeToUpdate(lastRead) <= moment().unix()) {
     // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
-    songs = getSongsFromFile(getPath())
+    songs = db.getSongsFromFile(db.getPath())
     // store the current time in the database as the time last read
-    db.lastRead.put({id: 0, date: moment().unix()})
+    store.set('lastRead', moment().unix())
     // log data runs async, but we want it to be done before we continue
-    await logData(songs)
+    await db.logData(songs)
   }
   // get all songs from the db, and overwrite the songs from the read in file
   // the read in file has slightly different key values from what is in the database
-  songs = await db.songs.toArray()
+  songs = await db.getAllSongs()
   // hide the loading icon
   document.getElementById('loadingIcon').style.display = 'none'
 
@@ -71,6 +45,7 @@ let app
   let artists = buildArtistsArray(tree)
 
   // create our vue instance
+  // eslint-disable-next-line
   app = new Vue({
     el: '#app',
     data: {
@@ -81,11 +56,27 @@ let app
       selected: {
         artist: '',
         album: '',
-        song: '',
+        song: ''
+      },
+      album: {
+        songs: 0,
+        playTime: 0,
+        playCount: 0,
+        year: 0,
+        genre: '',
+        rating: 0
+      },
+      artist: {
+        songs: 0,
+        playTime: 0,
+        playCount: 0,
+        yearRange: {},
+        genre: '',
+        rating: 0
       }
     },
     watch: {
-      'selected.artist': function() {
+      'selected.artist': async function() {
         // clear all albums
         this.albums = []
         // for every album under the artist
@@ -93,11 +84,45 @@ let app
           // add that album to our array
           this.albums.push(albumKey)
         }
+
+        // update artist info
+        const artistSongs = await db.getAllArtistSongs(this.selected.artist)
+        this.artist.songs = artistSongs.length
+
+        // play count
+        // reset it to 0 when we change artists
+        this.artist.playCount = 0
+        for (let song of artistSongs) {
+          this.artist.playCount += song.playCount
+        }
+
+        // play time
+        let time = parse.msToTime(await db.getTotalPlayTimeByArtist(this.selected.artist))
+        this.artist.playTime = `${time.h}h ${time.m}m ${time.s}s`
+
+        this.artist.yearRange = await db.artistRangeYear(this.selected.artist)
+        this.artist.rating = await db.averageArtistRating(this.selected.artist)
+
+        this.artist.genre = await db.getArtistGenre(this.selected.artist)
       },
       'selected.album': async function() {
         // get all songs on that album made by that artist
-        let albumSongs = await db.songs.where(['album', 'artist'])
-                          .equals([this.selected.album, this.selected.artist]).toArray()
+        const albumSongs = await db.getAllSongsOnAlbumByArtist(this.selected.album, this.selected.artist)
+
+        this.album.songs = albumSongs.length
+        let time = parse.msToTime(await db.getTotalPlayTimeByAlbum(this.selected.album))
+        this.album.playTime = `${time.h}h ${time.m}m ${time.s}s`
+
+        // play count
+        // reset it to 0 when we change artists
+        this.album.playCount = 0
+        for (let song of albumSongs) {
+          this.album.playCount += song.playCount
+        }
+        this.album.year = albumSongs[0].year
+        this.album.genre = albumSongs[0].genre
+        this.album.rating = await db.averageAlbumRating(this.selected.album)
+        this.album.rating += '/100'
 
         // clear all songs
         this.songs = []
@@ -108,32 +133,45 @@ let app
 
         // init our chart data
         let chartData = {
+          // links the time x values to the play count y values
           xs: {},
+          // holds the play counts and the play times
           columns: []
         }
         // for every song in that album by that artist
         for (let song of albumSongs) {
           // get the play history of that song
-          let history = await getPlayHistory(song.id)
-          // remove the "date" and "play count" strings in the arrays
-          history.date.splice(0,1)
-          history.playCount.splice(0,1)
+          let history = await db.getPlayHistory(song.id, 'day')
           // set our play count data to have the name of the song
           let playCountData = [song.name]
           // set our time data to have the name of the song and " Time"
-          let timeData = [song.name + " Time"]
+          let timeData = [`${song.name} Time`]
+
+          // if the last element in the date array is not today
+          if (history.date[history.date.length - 1] !== moment().format('MM/DD/YY')) {
+            // append on the most recent play count on today
+            // this is so every line reaches the right side of the graph
+            playCountData.push(history.playCount[history.playCount.length - 1])
+            timeData.push(moment().format('MM/DD/YY'))
+          }
+
           // add in our data, a column with our play count and time
           chartData.columns.push(playCountData.concat(history.playCount))
           chartData.columns.push(timeData.concat(history.date))
+
           // bind the play count and time arrays together in c3
-          chartData.xs[song.name] = song.name + " Time"
+          // eg. song X Time is the array of dates for song X play counts
+          chartData.xs[song.name] = `${song.name} Time`
         }
-        let chart = c3.generate({
+        c3.generate({
           bindto: '#chart',
           data: {
             xs: chartData.xs,
-            xFormat: '%m/%d/%Y %H:%M',
-            columns: chartData.columns,
+            xFormat: '%m/%d/%Y',
+            columns: chartData.columns
+          },
+          legend: {
+            position: 'right'
           },
           zoom: {
             enabled: true
@@ -143,7 +181,7 @@ let app
               type: 'timeseries', // the x axis has a timeseries data type
               tick: {
                 // the format shown when the mouse hovers over that dot
-                format: '%m/%d %H:%M'
+                format: '%m/%d'
                 // fit: false, if you want to keep the x axis ticks from sticking to the data points
                 // count: 4 if you want to set the ticks to a fixed ammount
               }
@@ -152,44 +190,40 @@ let app
         })
       },
       'selected.song': function() {
-        db.songs.get({album: this.selected.album, name: this.selected.song}, songResponse => {
-          return getPlayHistory(songResponse.id)
-        }).then(function(e) {
-          //deep copy the array
-          let values = e.playCount.slice()
-          values.splice(0,1)
-          c3.generate({
-            bindto: '#chart',
-            data: {
-              x: 'date',
-              xFormat: '%m/%d/%Y %H:%M',
-              columns: [e.date, e.playCount]
-            },
-            axis: {
-              x: {
-                type: 'timeseries', // the x axis has a timeseries data type
-                tick: {
-                  // the format shown when the mouse hovers over that dot
-                  format: '%m/%d %H:%M'
-                  // fit: false, if you want to keep the x axis ticks from sticking to the data points
-                  // count: 4 if you want to set the ticks to a fixed ammount
+        db.getSongFromAlbum(this.selected.song, this.selected.album)
+          .then(songResponse => {
+            return db.getPlayHistory(songResponse.id, 'minute')
+          }).then(function(e) {
+            console.log([['date'].concat(e.date), ['play'].concat(e.playCount)])
+            c3.generate({
+              bindto: '#chart',
+              data: {
+                x: 'date',
+                xFormat: '%m/%d/%Y %H:%M',
+                columns: [['date'].concat(e.date), ['play'].concat(e.playCount)]
+              },
+              axis: {
+                x: {
+                  type: 'timeseries', // the x axis has a timeseries data type
+                  tick: {
+                    // the format shown when the mouse hovers over that dot
+                    format: '%m/%d %H:%M'
+                    // fit: false, if you want to keep the x axis ticks from sticking to the data points
+                    // count: 4 if you want to set the ticks to a fixed ammount
+                  }
                 }
               }
-            }
-          });
-        })
+            })
+          })
       }
     }
   })
 })()
 
 function buildSongTree(songs) {
-  // get our artist element
-  let artistSelect = document.getElementById('artist')
-
   // shorthand variables
-  let artist = ""
-  let album = ""
+  let artist = ''
+  let album = ''
   let tree = {}
 
   for (let song of songs) {

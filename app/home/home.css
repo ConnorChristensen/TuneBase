@@ -1,0 +1,18 @@
+table {
+  text-align: center;
+  margin: 5px 0;
+  width: 100%;
+}
+table th {
+  width: 100%;
+  padding: 10px 0;
+}
+table td {
+  font-weight: 100;
+  padding: 8px 0;
+}
+
+/* make the stroke on the donut charts be the same color
+as the background */
+.c3-chart-arc path { stroke: #565766; }
+#era, #genre { padding: 10px; }
