@@ -62,6 +62,7 @@ module.exports = {
       ms: ms
     }
   },
+  // adds two time objects together
   addTime: function(t1, t2) {
     // ammount of rollover time
     let msRoll, sRoll, mRoll
