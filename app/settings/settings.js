@@ -8,7 +8,7 @@ function createDBObject(db) {
   return db.transaction('r', db.tables, () => {
     return Promise.all(
       db.tables.map(table => table.toArray()
-        .then(rows => ({table: table.name, rows: rows}))
+        .then(rows => ({ table: table.name, rows: rows }))
       )
     )
   })
@@ -41,7 +41,7 @@ let app = new Vue({
       // create a single object with the contents of the database
       createDBObject(db.getDB()).then(function(e) {
         // ask the user for a folder where they can store a backup
-        let backupLocation = dialog.showOpenDialog({properties: ['openDirectory']})
+        let backupLocation = dialog.showOpenDialog({ properties: ['openDirectory'] })
         // name the backup file backup.json
         backupLocation += '/backup.json'
         // write the the json object to the file
@@ -49,7 +49,7 @@ let app = new Vue({
           // if there is an error, log it
           if (err) { return console.error(err) }
           // let the users know that the data was backed up ok
-          dialog.showMessageBox({type: 'info', message: 'The data was backed up'})
+          dialog.showMessageBox({ type: 'info', message: 'The data was backed up' })
         })
       })
     },
@@ -65,7 +65,7 @@ let app = new Vue({
         // start up the database
         db.init()
         // find the location of the backup file
-        const backupLocation = dialog.showOpenDialog({properties: ['openFile']})[0]
+        const backupLocation = dialog.showOpenDialog({ properties: ['openFile'] })[0]
         // read in the backup file
         const backup = JSON.parse(fs.readFileSync(backupLocation).toString('utf-8'))
         // for every table in the backup file
@@ -78,7 +78,7 @@ let app = new Vue({
               .then(() => db.getTable(t.table).bulkAdd(t.rows))
           }
         })
-        dialog.showMessageBox({type: 'info', message: 'The data was successfully imported'})
+        dialog.showMessageBox({ type: 'info', message: 'The data was successfully imported' })
       }
     }
   }

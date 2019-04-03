@@ -118,7 +118,7 @@ let app = new Vue({
     }
 
     // calculate the total play time
-    let time = {h: 0, m: 0, s: 0, ms: 0}
+    let time = { h: 0, m: 0, s: 0, ms: 0 }
     let artists = await db.getAllArtists()
     // will store the total play time by artist
     let timeByArtist = {}

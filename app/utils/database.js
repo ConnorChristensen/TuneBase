@@ -56,7 +56,7 @@ module.exports = {
     return db.songs.where(['album', 'artist']).equals([album, artist]).toArray()
   },
   getSongFromAlbum: async function(song, album) {
-    return db.songs.get({'album': album, 'name': song})
+    return db.songs.get({ 'album': album, 'name': song })
   },
   // gets the song ID based off the name
   getSongID: async function(song) {
@@ -239,7 +239,7 @@ module.exports = {
     // if our source file path does not exist
     if (!sourceFile) {
       // let the user pick the file
-      let path = dialog.showOpenDialog({properties: ['openFile']})[0]
+      let path = dialog.showOpenDialog({ properties: ['openFile'] })[0]
       // set the path in the database
       store.set('sourceFile', path)
       return path
