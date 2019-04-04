@@ -95,7 +95,11 @@ function createWindow() {
     height: 600,
     titleBarStyle: 'hidden',
     minWidth: 300,
-    minHeight: 300
+    minHeight: 300,
+    // turn on node
+    webPreferences: {
+      nodeIntegration: true
+   }
   })
 
   // load the index.html of the app
