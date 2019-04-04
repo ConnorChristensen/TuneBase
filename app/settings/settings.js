@@ -1,4 +1,5 @@
 let db = require('../utils/database.js')
+let time = require('../utils/time.js')
 let fs = require('fs')
 
 const Store = require('electron-store')
@@ -42,14 +43,18 @@ let app = new Vue({
       createDBObject(db.getDB()).then(function(e) {
         // ask the user for a folder where they can store a backup
         let backupLocation = dialog.showOpenDialog({ properties: ['openDirectory'] })
-        // name the backup file backup.json
-        backupLocation += '/backup.json'
+        // name the backup file tunebase_backup(year-month-day).json
+        backupLocation += `/tunebase backup (${time.yearMonthDay(new Date())}).json`
         // write the the json object to the file
         fs.writeFile(backupLocation, JSON.stringify(e), function(err) {
           // if there is an error, log it
           if (err) { return console.error(err) }
           // let the users know that the data was backed up ok
-          dialog.showMessageBox({ type: 'info', message: 'The data was backed up' })
+          dialog.showMessageBox({
+            type: 'info',
+            message: `The data was backed up in the file "tunebase backup (${time.yearMonthDay(new Date())}).json"`,
+            detail: 'The file takes date format of year-month-day'
+          })
         })
       })
     },
