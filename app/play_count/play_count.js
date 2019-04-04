@@ -15,6 +15,24 @@ let app
 *********** MAIN FUNCTION START OF PROGRAM ***********
 *****************************************************/
 ;(async function() {
+  /** *** helper functions *******/
+  // if there are duplcate days in the history logs, remove them
+  // it expects a history object with two arrays of equal length
+  // playCount and date
+  function removeDuplcateDays(history) {
+    for (let x = 0; x < history.date.length - 1; x++) {
+      // if we have two points in the same day
+      if (history.date[x] === history.date[x + 1]) {
+        // remove the first one from both data sets
+        history.date.splice(x, 1)
+        history.playCount.splice(x, 1)
+        // move back one since our array is now shorter
+        x--
+      }
+    }
+    return history
+  }
+
   // set up the database
   db.init()
 
@@ -154,6 +172,8 @@ let app
             playCountData.push(history.playCount[history.playCount.length - 1])
             timeData.push(moment().format('MM/DD/YY'))
           }
+
+          history = removeDuplcateDays(history)
 
           // add in our data, a column with our play count and time
           chartData.columns.push(playCountData.concat(history.playCount))
