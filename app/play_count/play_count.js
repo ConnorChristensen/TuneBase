@@ -201,7 +201,7 @@ let app
               type: 'timeseries', // the x axis has a timeseries data type
               tick: {
                 // the format shown when the mouse hovers over that dot
-                format: '%m/%d'
+                format: '%m/%d/%y'
                 // fit: false, if you want to keep the x axis ticks from sticking to the data points
                 // count: 4 if you want to set the ticks to a fixed ammount
               }
