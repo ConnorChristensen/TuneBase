@@ -1,11 +1,9 @@
 let c3 = require('c3')
 let db = require('../utils/database.js')
 let commaNumber = require('comma-number')
-const timeFormat = 'MM/DD/YY H:mm'
-const moment = require('moment')
+const time = require('../utils/time.js')
 const Store = require('electron-store')
 const store = new Store()
-const parse = require('../utils/parser.js')
 const d3 = require('d3')
 
 // eslint-disable-next-line
@@ -23,7 +21,7 @@ let app = new Vue({
     const allSongs = await db.getAllSongs()
     this.songCount = commaNumber(allSongs.length)
     const updateUnix = db.timeToUpdate(store.get('lastRead'))
-    this.updateTime = moment.unix(updateUnix).format(timeFormat)
+    this.updateTime = time.format(time.unix(updateUnix), 'mm/dd/yy hh:mm')
 
     // calculate the decade division
     let decades = {
@@ -112,13 +110,14 @@ let app = new Vue({
       timeByAlbum[album] = albumTime
     }
     let topListAlbum = Object.keys(timeByAlbum).sort((a, b) => timeByAlbum[b] - timeByAlbum[a])
+    let albumTime
     for (let x = 0; x < 7; x += 1) {
-      let time = parse.msToTime(timeByAlbum[topListAlbum[x]])
-      this.totalAlbumTime[topListAlbum[x]] = `${time.h}h ${time.m}m ${time.s}s`
+      albumTime = time.msToTime(timeByAlbum[topListAlbum[x]])
+      this.totalAlbumTime[topListAlbum[x]] = `${albumTime.h}h ${albumTime.m}m ${albumTime.s}s`
     }
 
     // calculate the total play time
-    let time = { h: 0, m: 0, s: 0, ms: 0 }
+    let totalTime = { h: 0, m: 0, s: 0, ms: 0 }
     let artists = await db.getAllArtists()
     // will store the total play time by artist
     let timeByArtist = {}
@@ -126,21 +125,21 @@ let app = new Vue({
       let artistTime = await db.getTotalPlayTimeByArtist(artist)
       // store the artist time in an object for processing later
       timeByArtist[artist] = artistTime
-      time = parse.addTime(time, parse.msToTime(artistTime))
+      totalTime = time.addTime(totalTime, time.msToTime(artistTime))
     }
-    if (time.h > 1000) {
-      let days = Math.floor(time.h / 24)
-      time.h = time.h % 24
-      this.totalListenTime = `${days}d ${time.h}h ${time.m}m ${time.s}s`
+    if (totalTime.h > 1000) {
+      let days = Math.floor(totalTime.h / 24)
+      totalTime.h = totalTime.h % 24
+      this.totalListenTime = `${days}d ${totalTime.h}h ${totalTime.m}m ${totalTime.s}s`
     } else {
-      this.totalListenTime = `${commaNumber(time.h)}h ${time.m}m ${time.s}s`
+      this.totalListenTime = `${commaNumber(totalTime.h)}h ${totalTime.m}m ${totalTime.s}s`
     }
 
     // organized list of keys from greatest to least
     let topList = Object.keys(timeByArtist).sort((a, b) => timeByArtist[b] - timeByArtist[a])
     for (let x = 0; x < 7; x += 1) {
-      let time = parse.msToTime(timeByArtist[topList[x]])
-      this.totalArtistTime[topList[x]] = `${time.h}h ${time.m}m ${time.s}s`
+      totalTime = time.msToTime(timeByArtist[topList[x]])
+      this.totalArtistTime[topList[x]] = `${totalTime.h}h ${totalTime.m}m ${totalTime.s}s`
     }
   }
 })

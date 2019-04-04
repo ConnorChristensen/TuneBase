@@ -1,13 +1,11 @@
 // import a file reader
 const fs = require('fs')
 const dexie = require('dexie')
-const moment = require('moment')
+const time = require('../utils/time.js')
 // for creating the hash of the artist name, album and song to make the ID
 const sha1 = require('sha1')
 const parse = require('../utils/parser.js')
 
-const timeMinutePrecision = 'MM/DD/YY HH:mm'
-const timeDayPrecision = 'MM/DD/YY'
 // access to stored info in the config file
 const Store = require('electron-store')
 const store = new Store()
@@ -181,11 +179,11 @@ module.exports = {
       // if precision is set to day, only return day/month/year
       if (precision === 'day') {
         songArray.date.push(
-          moment.unix(play.date).format(timeDayPrecision)
+          time.format(time.unix(play.date), 'MM/DD/YY')
         )
       } else {
         songArray.date.push(
-          moment.unix(play.date).format(timeMinutePrecision)
+          time.format(time.unix(play.date), 'MM/DD/YY HH:mm')
         )
       }
     }
@@ -248,10 +246,10 @@ module.exports = {
     return sourceFile
   },
   // adds the new play count data set to the database
-  addPlayCount: function(trackID, playCount, time) {
+  addPlayCount: function(trackID, playCount, date) {
     return db.playCount.add({
       trackID: trackID,
-      date: time,
+      date: date,
       playCount: playCount
     })
   },
@@ -289,7 +287,7 @@ module.exports = {
           trackNumber: song['Track Number'],
           bitRate: song['Bit Rate'],
           // I don't know why, but apple's Play Date is not in unix time
-          playDate: moment.utc(song['Play Date UTC']).unix(),
+          playDate: time.getUnix(new Date(song['Play Date UTC'])),
           album: song['Album'],
           genre: song['Genre']
         }).catch(function(error) {
@@ -301,7 +299,7 @@ module.exports = {
 
         // if we dont have any recent data points, add it in
         if (recentPlayCount === null || currPlayCount > recentPlayCount) {
-          let convertedTime = moment.utc(song['Play Date UTC']).unix()
+          let convertedTime = time.getUnix(new Date(song['Play Date UTC']))
           this.addPlayCount(songID, currPlayCount, convertedTime)
         }
       }

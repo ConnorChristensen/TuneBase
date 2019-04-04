@@ -1,7 +1,6 @@
 // create a dialog
 const db = require('../utils/database.js')
-const parse = require('../utils/parser.js')
-const moment = require('moment')
+const time = require('../utils/time.js')
 const c3 = require('c3')
 
 const Store = require('electron-store')
@@ -43,13 +42,13 @@ let app
   let songs = []
 
   // if it is time to update the data set
-  if (!lastRead || db.timeToUpdate(lastRead) <= moment().unix()) {
+  if (!lastRead || db.timeToUpdate(lastRead) <= time.getUnix(new Date())) {
     // show the loading icon
     document.getElementById('loadingIcon').style.display = 'block'
     // parse the file and get the songs
     songs = db.getSongsFromFile(db.getPath())
     // store the current time in the database as the time last read
-    store.set('lastRead', moment().unix())
+    store.set('lastRead', time.getUnix(new Date()))
     // log data runs async, but we want it to be done before we continue
     await db.logData(songs)
   }
@@ -114,9 +113,8 @@ let app
           this.artist.playCount += song.playCount
         }
 
-        // play time
-        let time = parse.msToTime(await db.getTotalPlayTimeByArtist(this.selected.artist))
-        this.artist.playTime = `${time.h}h ${time.m}m ${time.s}s`
+        let playTime = time.msToTime(await db.getTotalPlayTimeByArtist(this.selected.artist))
+        this.artist.playTime = `${playTime.h}h ${playTime.m}m ${playTime.s}s`
 
         this.artist.yearRange = await db.artistRangeYear(this.selected.artist)
         this.artist.rating = await db.averageArtistRating(this.selected.artist)
@@ -128,8 +126,8 @@ let app
         const albumSongs = await db.getAllSongsOnAlbumByArtist(this.selected.album, this.selected.artist)
 
         this.album.songs = albumSongs.length
-        let time = parse.msToTime(await db.getTotalPlayTimeByAlbum(this.selected.album))
-        this.album.playTime = `${time.h}h ${time.m}m ${time.s}s`
+        let songTime = time.msToTime(await db.getTotalPlayTimeByAlbum(this.selected.album))
+        this.album.playTime = `${songTime.h}h ${songTime.m}m ${songTime.s}s`
 
         // play count
         // reset it to 0 when we change artists
@@ -166,11 +164,11 @@ let app
           let timeData = [`${song.name} Time`]
 
           // if the last element in the date array is not today
-          if (history.date[history.date.length - 1] !== moment().format('MM/DD/YY')) {
+          if (history.date[history.date.length - 1] !== time.format(new Date(), 'MM/DD/YY')) {
             // append on the most recent play count on today
             // this is so every line reaches the right side of the graph
             playCountData.push(history.playCount[history.playCount.length - 1])
-            timeData.push(moment().format('MM/DD/YY'))
+            timeData.push(time.format(new Date(), 'MM/DD/YY'))
           }
 
           history = removeDuplcateDays(history)
@@ -214,7 +212,6 @@ let app
           .then(songResponse => {
             return db.getPlayHistory(songResponse.id, 'minute')
           }).then(function(e) {
-            console.log([['date'].concat(e.date), ['play'].concat(e.playCount)])
             c3.generate({
               bindto: '#chart',
               data: {

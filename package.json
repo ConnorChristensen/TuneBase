@@ -10,7 +10,7 @@
     "start": "electron ./app/",
     "dist": "electron-builder",
     "lint": "./node_modules/.bin/eslint ./app/**/*.js || true",
-	"lint-fix": "npx eslint ./app/**/*.js --fix"
+    "lint-fix": "npx eslint ./app/**/*.js --fix"
   },
   "devDependencies": {
     "commitizen": "^3.0.7",
@@ -29,7 +29,6 @@
     "comma-number": "^2.0.0",
     "dexie": "^2.0.4",
     "electron-store": "^3.1.0",
-    "moment": "^2.24.0",
     "sha1": "^1.1.1",
     "vue": "^2.6.10"
   },
