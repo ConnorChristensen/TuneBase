@@ -49,7 +49,7 @@
             <td>
               <p>Artist</p>
               <select v-model="selected.artist">
-                <option value="">Artist</option>
+                <option value="" disabled>Artist</option>
                 <option v-for="artist in artists" v-bind:value="artist">{{artist.substring(0, 50)}}</option>
               </select>
             </td>
@@ -58,7 +58,7 @@
             <td>
               <p>Album</p>
               <select v-model="selected.album">
-                <option value="">Album</option>
+                <option value="" disabled>Album</option>
                 <option v-for="album in albums" v-bind:value="album">{{album}}</option>
               </select>
             </td>
@@ -67,7 +67,7 @@
             <td>
               <p>Song</p>
               <select v-model="selected.song">
-                <option value="">Song</option>
+                <option value="" disabled>Song</option>
                 <option v-for="song in songs" v-bind:value="song">{{song}}</option>
               </select>
             </td>
