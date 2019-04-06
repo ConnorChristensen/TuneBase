@@ -21,7 +21,10 @@ let app = new Vue({
     const allSongs = await db.getAllSongs()
     this.songCount = commaNumber(allSongs.length)
     const updateUnix = db.timeToUpdate(store.get('lastRead'))
-    this.updateTime = time.format(time.unix(updateUnix), 'mm/dd/yy hh:mm')
+    this.updateTime = time.format({
+      date: time.unix(updateUnix),
+      format: 'mm/dd/yy hh:mm'
+    })
 
     // calculate the decade division
     let decades = {

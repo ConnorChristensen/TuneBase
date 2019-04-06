@@ -12,7 +12,10 @@ module.exports = {
   getUnix: function(date) {
     return Math.floor(date.getTime() / 1000)
   },
-  format: function(date, form) {
+  format: function(info) {
+    const date = info.date
+    let form = info.format
+
     // reaplce y with the year
     form = form.replace(/y{4}/gi, date.getFullYear())
     // replace yy with the last two characters of the full year

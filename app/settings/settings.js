@@ -44,7 +44,7 @@ let app = new Vue({
         // ask the user for a folder where they can store a backup
         let backupLocation = dialog.showOpenDialog({ properties: ['openDirectory'] })
         // name the backup file tunebase_backup(year-month-day).json
-        backupLocation += `/tunebase backup (${time.format(new Date(), 'yyyy-mm-dd')}).json`
+        backupLocation += `/tunebase backup (${time.format({ date: new Date(), format: 'yyyy-mm-dd' })}).json`
         // write the the json object to the file
         fs.writeFile(backupLocation, JSON.stringify(e), function(err) {
           // if there is an error, log it
@@ -52,7 +52,7 @@ let app = new Vue({
           // let the users know that the data was backed up ok
           dialog.showMessageBox({
             type: 'info',
-            message: `The data was backed up in the file "tunebase backup (${time.format(new Date(), 'yyyy-mm-dd')}).json"`,
+            message: `The data was backed up in the file "tunebase backup (${time.format({ date: new Date(), format: 'yyyy-mm-dd' })}).json"`,
             detail: 'The file takes date format of year-month-day'
           })
         })

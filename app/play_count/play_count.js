@@ -164,11 +164,14 @@ let app
           let timeData = [`${song.name} Time`]
 
           // if the last element in the date array is not today
-          if (history.date[history.date.length - 1] !== time.format(new Date(), 'MM/DD/YY')) {
+          if (history.date[history.date.length - 1] !== time.format({ date: new Date(), format: 'MM/DD/YY' })) {
             // append on the most recent play count on today
             // this is so every line reaches the right side of the graph
             playCountData.push(history.playCount[history.playCount.length - 1])
-            timeData.push(time.format(new Date(), 'MM/DD/YY'))
+            timeData.push(time.format({
+              date: new Date(),
+              format: 'MM/DD/YY'
+            }))
           }
 
           history = removeDuplcateDays(history)

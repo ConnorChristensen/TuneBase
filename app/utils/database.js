@@ -179,11 +179,11 @@ module.exports = {
       // if precision is set to day, only return day/month/year
       if (precision === 'day') {
         songArray.date.push(
-          time.format(time.unix(play.date), 'MM/DD/YY')
+          time.format({ date: time.unix(play.date), format: 'MM/DD/YY' })
         )
       } else {
         songArray.date.push(
-          time.format(time.unix(play.date), 'MM/DD/YY HH:mm')
+          time.format({ date: time.unix(play.date), format: 'MM/DD/YY HH:mm' })
         )
       }
     }
@@ -295,7 +295,7 @@ module.exports = {
         })
 
         // set our dbSong only if recent data exists
-        const currPlayCount = song['Play Count'] ? song['Play Count'] : 0
+        const currPlayCount = song['Play Count'] || 0
 
         // if we dont have any recent data points, add it in
         if (recentPlayCount === null || currPlayCount > recentPlayCount) {
