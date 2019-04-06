@@ -99,8 +99,14 @@ button {
   min-width: 150px;
   margin: 15px auto;
   cursor: pointer;
+  transition: .5s background;
+}
+
+button:focus {
+  outline: 0;
 }
 
 button:hover {
-  background: darken(#60B2AA, 10%)
+  transition: .5s background;
+  background: hsl(173, 35%, 37%)
 }
