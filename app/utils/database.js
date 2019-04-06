@@ -47,6 +47,21 @@ module.exports = {
   destroy: function() {
     dexie.delete('iTunesData')
   },
+  // gets an object with type and name
+  // eg. { type: "genre", name: "Podcast"}
+  deleteBy: function(data) {
+    // encapsulate deletions in a single transaction for speed and reliability
+    return db.transaction('rw', db.songs, async() => {
+      const songs = await db.songs
+        .where(data.type)
+        .equals(data.name)
+        .toArray()
+
+      let songIDs = songs.map(el => el.id)
+      db.playCount.bulkDelete(songIDs)
+      db.songs.bulkDelete(songIDs)
+    })
+  },
   getAllSongs: async function() {
     return db.songs.toArray()
   },
