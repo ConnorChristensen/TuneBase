@@ -1,15 +1,9 @@
 # TuneBase
-An app for tracking data from iTunes over time.
-
-The purpose of this app is not to be fast, or to be used for anything other than
-entertainment, so please be patient with it.
-This application is supposed to be an easy way to get fun information to both
-Mac and Windows users, and it does that job well.
+An app for tracking data from iTunes over time
 
 ## Design
 
-The application is designed to be visually pleasing, present the data in a clear way, and be easy for users to navigate.
-The application may take some time to match this design, but we will be working to make the app look as close as possible to the design.
+The application is designed to be visually pleasing, present the data in a clear way, and be easy for users to navigate
 
 ![alt text](images/home.png)
 
@@ -20,26 +14,19 @@ The application may take some time to match this design, but we will be working 
 ## Getting started
 When the app first opens up, a file browser will pop up.
 Use that browser to select the file **iTunes Library.xml**.
-For locating the iTunes Library file, please consult the iTunes Library section
+For locating the iTunes Library file, please consult the iTunes Library section.
+After you select the file, it will remember where it is stored and will not ask for it again.
 
-After you select the file, it will not ask for it again.
-
-Since the app is not focused on running quickly, please be patient while
-it extracts all the information from the iTunes library.
+Please be patient while it extracts all the information from the iTunes library.
 The time it takes to load depends on the size of your iTunes Library.
-For me, the few thousand songs I have takes the app about 8 seconds to load.
-
+For me, around 5,000 thousand songs I have takes the app about 8 seconds to load.
 After it extracts the information from the iTunes Library, it will store it in
-a database.
-The app loads almost instantly when pulling information from the database.
+an internal database.
 
 ## Data Storage
-* The app will not damage any information on your iTunes Library, as it only
-reads from the file.
-* There is no guarantee that the data will be maintained through the different
-versions of this software.
-* This app will never collect any of your information, the app does not need an
-internet connection to run.
+* The app will not damage any information on your iTunes Library, as it only reads from the file.
+* There is no guarantee that the data will be maintained through the different versions of this software.
+* All the information stored in the app will be kept private. The app does not even make a connection to the internet.
 
 
 ## iTunes Library
