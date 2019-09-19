@@ -4,7 +4,7 @@ windows and the behaviour of the app is defined.
 */
 
 // import electron into the app and BrowserWindow variables
-const {app, BrowserWindow, Menu} = require('electron')
+const { app, BrowserWindow, Menu } = require('electron')
 
 const path = require('path')
 const url = require('url')
@@ -18,22 +18,22 @@ const template = [
   {
     label: 'View',
     submenu: [
-      {role: 'reload'},
-      {role: 'forcereload'},
-      {role: 'toggledevtools'},
-      {type: 'separator'},
-      {role: 'resetzoom'},
-      {role: 'zoomin'},
-      {role: 'zoomout'},
-      {type: 'separator'},
-      {role: 'togglefullscreen'}
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' }
     ]
   },
   {
     role: 'window',
     submenu: [
-      {role: 'minimize'},
-      {role: 'close'}
+      { role: 'minimize' },
+      { role: 'close' }
     ]
   },
   {
@@ -52,37 +52,37 @@ if (process.platform === 'darwin') {
   template.unshift({
     label: app.getName(),
     submenu: [
-      {role: 'about'},
-      {type: 'separator'},
-      {role: 'services', submenu: []},
-      {type: 'separator'},
-      {role: 'hide'},
-      {role: 'hideothers'},
-      {role: 'unhide'},
-      {type: 'separator'},
-      {role: 'quit'}
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services', submenu: [] },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' }
     ]
   })
 
   // Add speech elements to the sub-menu on edit
   template[1].submenu.push(
-    {type: 'separator'},
+    { type: 'separator' },
     {
       label: 'Speech',
       submenu: [
-        {role: 'startspeaking'},
-        {role: 'stopspeaking'}
+        { role: 'startspeaking' },
+        { role: 'stopspeaking' }
       ]
     }
   )
 
   // Replace the window menu on mac with more options
   template[3].submenu = [
-    {role: 'close'},
-    {role: 'minimize'},
-    {role: 'zoom'},
-    {type: 'separator'},
-    {role: 'front'}
+    { role: 'close' },
+    { role: 'minimize' },
+    { role: 'zoom' },
+    { type: 'separator' },
+    { role: 'front' }
   ]
 }
 
@@ -99,7 +99,7 @@ function createWindow() {
     // turn on node
     webPreferences: {
       nodeIntegration: true
-   }
+    }
   })
 
   // load the index.html of the app
