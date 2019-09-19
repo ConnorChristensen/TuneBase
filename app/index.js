@@ -94,8 +94,10 @@ function createWindow() {
     width: 800,
     height: 600,
     titleBarStyle: 'hidden',
-    minWidth: 300,
+    minWidth: 500,
     minHeight: 300,
+    transparent: true,
+    backgroundColor: '#C0000000',
     // turn on node
     webPreferences: {
       nodeIntegration: true
